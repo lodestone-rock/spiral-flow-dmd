@@ -267,14 +267,17 @@ Ablations (50k updates, `w=2` unless noted; 4-NFE metrics):
 | `lr=1e-4` | 0.0879 | 0.0322 | 0.236 | slower; the 1e-3 toy lr is better |
 | Euler, `N=128`, `K=2` | 0.0839 | 0.0286 | 0.243 | same accuracy, 2× head params and 2 teacher calls |
 | shifted grid `s=2` | 0.0868 | 0.0402 | 0.240 | worse at 4 NFE; 1 NFE slightly better (0.120 vs 0.125) |
+| data-free carry (10k) | 0.0884 | 0.0300 | 0.236 | Algorithm 3 works; close to the 50k data-dependent arm |
 | `w=1` clean-field control | **0.0226** | 0.0578 | 0.379 | teacher grid 0.0173; not comparable to the `w=2` DMD rows |
 
 The Euler `N=128` recipe is a wash: it matches the midpoint `N=64` trajectory
 error with twice the head overhead. The paper's time shift, at least at `s=2`,
 does not help the 4-NFE end on this toy; it trades a little 1-NFE SW1 for a
-larger trajectory error. The `w=1` control shows the method itself is sound on
-a clean field (4-NFE SW1 0.023 vs teacher 0.017), which isolates the `w=4`
-underfit to the steeper guided field rather than a coordinate bug.
+larger trajectory error. The data-free carry reaches 0.0884 / 0.0300 in only
+10k updates, so Algorithm 3 is viable here even though the spiral has exact
+data. The `w=1` control shows the method itself is sound on a clean field
+(4-NFE SW1 0.023 vs teacher 0.017), which isolates the `w=4` underfit to the
+steeper guided field rather than a coordinate bug.
 
 ![PDD at w=1](figures/pdd_samples_w1.png)
 
