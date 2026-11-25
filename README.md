@@ -159,6 +159,16 @@ between the conditional and guided distributions rather than copying the
 teacher's CFG bias. Probe SW1 was still improving at 20k, so the arms are
 undertrained rather than equilibrated.
 
+![DMD final outputs at w=2: target, both teachers, and all eight distilled students](figures/comparison_w2.png)
+
+*DMD final outputs at `w=2` on the spiral. Top row: 8-class mixture; bottom row:
+class-4 close-up. Gray is the exact target. Same axes and initial noise.*
+
+![DMD2/BPTT 4-step student progression against the teacher](figures/trajectory_dmd2_bptt_w2.png)
+
+*`dmd2_bptt_w2` progression: teacher Heun-40 at steps 10/20/30/40 (top) versus
+the student's four denoise/renoise steps (bottom).*
+
 ## Frozen clockwise class interpolation (generalization)
 
 `interpolate.py` freezes the seed-42 teacher and sweeps 29 fractional conditions
@@ -179,6 +189,19 @@ near-rotation-equivariant scalar rather than eight isolated classes. `w=2`
 rotates just as smoothly but with the expected CFG expansion (larger radius and
 HDR mass). There is no periodic `0→7` wrap in the scalar encoding, so that
 interval is not evaluated.
+
+![Clockwise interpolation diagnostics at w=1](figures/interpolation_paths_w1.png)
+
+*Generated mean path versus the geometric reference, spread across conditions,
+and matched-noise paths for the unseen `g=4→3` interval. Same initial noise in
+every condition.*
+
+![Unseen g=4 to g=3 interpolation at w=1](figures/interpolation_4to3_w1.png)
+
+*The `g=4→3` interval in detail: endpoints are trained, the three interior
+conditions are unseen. Gray is the rotated geometric reference.*
+
+[Full 7→0 grid at w=2 (29 conditions)](figures/interpolation_all_w2.png)
 
 Key figures:
 
