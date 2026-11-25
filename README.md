@@ -17,11 +17,13 @@ experiment are not.
 | `core.py` | Spiral geometry and sampling, conditional CFG U-MLP, linear flow path, Heun sampler, metrics, plotting helpers. |
 | `train_flow.py` | Trains the conditional flow-matching teacher (10% class dropout) and renders a target/CFG sample grid. |
 | `dmd.py` | DMD and DMD2 distillation, 8 arms = {DMD1, DMD2} × {backward simulation, BPTT} × guidance `w ∈ {2,4}`, plus evaluation and comparison figures. |
+| `pdd.py` | Parallel decoding distillation: widen the teacher's final linear to `N=64` interval heads, train on-policy against midpoint teacher targets, fuse heads per block at inference; one checkpoint serves NFE 1/2/4/8. |
 | `interpolate.py` | Frozen clockwise class-condition sweep `g=7→0` with shared noise and rotated geometric references; no retraining. |
-| `run_all.sh` | Tests → teacher → all DMD arms → interpolation → prints figure paths. |
+| `run_all.sh` | Tests → teacher → all DMD arms → PDD → interpolation → prints figure paths. |
 | `AGENTS.md` | Agent entrypoint: commands, smoke/full runs, artifact paths, invariants. |
 | `CLAUDE.md` | Pointer to `AGENTS.md` for Claude-based agents. |
-| `tests/test_pipeline.py` | 19 fast unit tests (data geometry, score identity, schedule, rollout grad masks, Heun snapshots, interpolation grid, checkpoint checks). |
+| `tests/test_pipeline.py` | 19 fast pipeline unit tests (data geometry, score identity, schedule, rollout grad masks, Heun snapshots, interpolation grid, checkpoint checks). |
+| `tests/test_pdd.py` | 17 fast PDD unit tests (grid/shift, head init, prefix advance, fused-vs-materialized heads, Euler/midpoint targets, closed-form constant teacher, data-free carry). |
 | `requirements.txt` | Torch/NumPy/Matplotlib requirements. |
 | `LICENSE` | MIT license. |
 | `CITATION.cff` | Machine-readable citation metadata (GitHub “Cite this repository”). |
@@ -48,13 +50,16 @@ cd experiments/spiral_flow_dmd
 python -m unittest discover -s tests -v
 python train_flow.py all --device cuda --run-name teacher
 python dmd.py all --device cuda --run-name dmd --teacher-run teacher
+python pdd.py all --device cuda --run-name pdd --teacher-run teacher --scales 2 \
+    --rk midpoint --steps 64 --block-min 8 --block-max 64 --heads 1 \
+    --updates 50000 --batch-size 2048 --lr 0.001
 python interpolate.py --device cuda --teacher-run teacher --scales 1 2
 ```
 
 Or in one command:
 
 ```bash
-./run_all.sh cuda teacher dmd
+./run_all.sh cuda teacher dmd pdd
 ```
 
 Quick smoke (small batch/steps, a few seconds):
@@ -65,6 +70,9 @@ python train_flow.py all --device cuda --run-name smoke_teacher \
 python dmd.py all --device cuda --run-name smoke_dmd --teacher-run smoke_teacher \
     --gen-updates 50 --batch-size 256 --pairs 4096 --eval-samples 128 \
     --teacher-steps 8 --log-every 25 --probe-every 50 --scales 2
+python pdd.py all --device cuda --run-name smoke_pdd --teacher-run smoke_teacher \
+    --updates 50 --batch-size 256 --eval-samples 128 --teacher-steps 8 \
+    --log-every 25 --probe-every 50 --probe-samples 64 --scales 2
 ```
 
 Every stage refuses to overwrite an existing checkpoint/output folder: pass a
@@ -103,6 +111,32 @@ DMD2 uses TTUR (5 critic updates per generator update) and no regression; DMD1
 adds the λ=0.25 regression anchor on pregenerated teacher ODE pairs.
 `bsim` backpropagates through one rollout step, `bptt` through all four.
 
+**PDD (student).** The paper's convention is `t=0` noise → `t=1` data, the
+opposite of this repo, so `pdd.py` works in the bridge `s = 1 − t` (noise →
+data): the student predicts `u_s = dx/ds = −v_t`, its heads initialize from
+`−teacher.output`, and integration steps are positive. The teacher's final
+linear is widened to `N=64` heads, one per interval of a uniform 64-node grid;
+every head reads the same backbone feature at the block start. At each update a
+block start is drawn from the eight student-grid nodes, `K=1` interval head is
+drawn from `[start, start+64)`, the student's detached parallel heads roll the
+state forward to that head, and the head is regressed onto the guided teacher's
+midpoint Runge–Kutta estimate of the interval mean velocity
+`ū ≈ (1/Δs)∫u_s ds`. There is no critic, GAN, JVP, or BPTT.
+
+At inference a block's heads are fused into one effective linear,
+
+```text
+x_{n+L} = x_n + (s_{n+L} − s_n) · W_fused H(x_n),
+W_fused = Σ_k (Δ_k / (s_{n+L} − s_n)) W_k,
+```
+
+so a 4-NFE sample is four backbone passes, each with one fused linear readout, and
+one checkpoint serves NFE 1/2/4/8. `--data-free` switches from exact data starts
+to a carried student trajectory; `--shift` warps the grid toward the noise side
+(paper Eq. 16; `1` is uniform). The default toy recipe is `N=64`, `L_min=8`,
+`L_max=64`, midpoint, `K=1`, data-dependent, 50k updates at `lr=1e-3` (the
+main table uses 200k; 4-NFE SW1/RMSE are flat by 50k).
+
 ## Outputs
 
 Teacher (`runs/teacher/`):
@@ -119,6 +153,19 @@ DMD (`runs/dmd/`):
 - `comparison_w2.png`, `comparison_w4.png` — all arms vs both teachers and the
   exact target, with a class-4 close-up
 - `evaluation_*/summary.json` — per-arm SW1/HDR/center error table
+
+PDD (`runs/pdd/`):
+- one folder per arm, e.g. `pdd_midpoint_w2/`: `generator.pt`, `config.json`,
+  `history.json`, `training_curves.png`
+- `evaluation_s256_n4096_seed1234/summary.json` — SW1/HDR50, diversity, and
+  RMSE to the teacher grid and to Heun-256 under shared noise, with Euler-NFE
+  and Heun-NFE teacher baselines
+- `evaluation_*/pdd_midpoint_w2_samples.npz` — matched-noise student arrays for
+  every NFE plus `teacher_grid` and `teacher_256`
+- `pdd_samples_w2.png` — target, both teachers, and the NFE sweep
+- `pdd_nfe_sweep_w2.png` — distribution and trajectory-agreement panels
+- `pdd_vs_dmd_w2.png` — matched-noise DMD2 vs PDD at 4 NFE
+- curated numbers: `results/pdd_summary.json`
 
 Interpolation (`runs/teacher/interpolation_*/`):
 - `metrics.json` — per-scale rotation direction, step angles, unseen/trained
@@ -173,6 +220,87 @@ class-4 close-up. Gray is the exact target. Same axes and initial noise.*
 *`dmd2_bptt_w2` progression: teacher Heun-40 at steps 10/20/30/40 (top) versus
 the student's four denoise/renoise steps (bottom).*
 
+## Parallel decoding distillation (PDD)
+
+The PDD arm reuses the frozen `w=2` teacher and the toy recipe in `pdd.py`
+(`N=64` midpoint interval heads, `K=1`, `L_min=8`, `L_max=64`,
+data-dependent, seed 42). It is a **trajectory** distillator: it learns the
+guided teacher's field, not the exact target, so its primary check is agreement
+with the teacher rather than SW1 alone. Metrics below use 4096 matched-noise
+samples per class; `RMSE→teacher` is the per-coordinate disagreement with the
+teacher grid under the same noise.
+
+| method | NFE | SW1 vs target ↓ | HDR50 | diversity | RMSE→teacher ↓ |
+|---|---|---|---|---|---|
+| Teacher Heun-256, `w=2` | 256 | 0.0821 | 74.7% | 0.248 | — |
+| Teacher Euler-8, `w=2` | 8 | 0.1059 | 14.6% | 0.186 | — |
+| Teacher Euler-4, `w=2` | 4 | 0.1383 | 11.8% | 0.143 | — |
+| DMD2 bsim, `w=2` | 4 | **0.0698** | 19.6% | 0.307 | 0.256 |
+| DMD2 bptt, `w=2` | 4 | 0.0807 | 48.0% | 0.277 | 0.244 |
+| PDD midpoint, `w=2` (200k) | 1 | 0.1253 | 24.7% | 0.169 | 0.092 |
+| | 2 | 0.0942 | 38.3% | 0.222 | 0.052 |
+| | 4 | 0.0812 | 57.0% | 0.252 | **0.0288** |
+| | 8 | 0.0764 | 60.5% | 0.267 | **0.0241** |
+
+Reading: PDD at 4 NFE lands on the teacher's own SW1 (0.0812 vs 0.0821) with
+four backbone calls instead of Heun-256's 512. DMD2's lower SW1 is not the same
+object: it has moved the distribution (RMSE 0.256 from the teacher), while PDD
+tracks it (0.0288, about 9× closer) and matches its diversity (0.252 vs 0.248).
+DMD2-bsim is overdispersed (0.307); DMD2-bptt is closer but still 8× farther
+from the teacher than PDD. PDD also beats the same-NFE Euler teacher by a wide
+margin (0.081 vs 0.138 at 4 NFE), which is the actual few-step-solver baseline.
+At 1 NFE it is 0.125 vs 0.285; at 8 NFE 0.076 vs 0.082 for Heun-256.
+
+The main residual is HDR50: 57% at 4 NFE versus 74.7% for the teacher, so the
+parallel heads capture the trajectory but still under-fill the arm centers.
+The 50k and 200k checkpoints are within noise on SW1/RMSE, so this toy recipe
+converges by roughly 50k updates. `w=4` is harder: the high-CFG field is
+steeper, and even 200k leaves the arm underfit (SW1 0.142 vs teacher grid
+0.136; RMSE 0.052; DMD2-bsim-w4 0.119). More capacity or the paper's lower
+guidance is the natural next step.
+
+Ablations (50k updates, `w=2` unless noted; 4-NFE metrics):
+
+| variant | 4-NFE SW1 ↓ | RMSE→teacher ↓ | diversity | note |
+|---|---|---|---|---|
+| uniform midpoint, `N=64`, `K=1` (main) | **0.0812** | **0.0288** | 0.252 | 200k; 50k is 0.0816 / 0.0287 |
+| `lr=1e-4` | 0.0879 | 0.0322 | 0.236 | slower; the 1e-3 toy lr is better |
+| Euler, `N=128`, `K=2` | 0.0839 | 0.0286 | 0.243 | same accuracy, 2× head params and 2 teacher calls |
+| shifted grid `s=2` | 0.0868 | 0.0402 | 0.240 | worse at 4 NFE; 1 NFE slightly better (0.120 vs 0.125) |
+| `w=1` clean-field control | **0.0226** | 0.0578 | 0.379 | teacher grid 0.0173; not comparable to the `w=2` DMD rows |
+
+The Euler `N=128` recipe is a wash: it matches the midpoint `N=64` trajectory
+error with twice the head overhead. The paper's time shift, at least at `s=2`,
+does not help the 4-NFE end on this toy; it trades a little 1-NFE SW1 for a
+larger trajectory error. The `w=1` control shows the method itself is sound on
+a clean field (4-NFE SW1 0.023 vs teacher 0.017), which isolates the `w=4`
+underfit to the steeper guided field rather than a coordinate bug.
+
+![PDD at w=1](figures/pdd_samples_w1.png)
+
+*The clean-field control. NFE 4 is close to the teacher; NFE 1 shows the
+expected one-block failure.*
+
+![PDD training curves at w=2](figures/pdd_training_curves_w2.png)
+
+*Training loss and 4-NFE probe SW1 at `w=2`. The probe is flat after about
+50k; the loss keeps drifting down slowly.*
+
+![PDD NFE sweep at w=2](figures/pdd_samples_w2.png)
+
+*Target, Heun-256, the 64-node midpoint teacher grid, and one PDD checkpoint at
+NFE 1/2/4/8. Same initial noise; gray is the exact target.*
+
+![PDD NFE diagnostics](figures/pdd_nfe_sweep_w2.png)
+
+*SW1, HDR50, center error, and RMSE to the teacher grid versus NFE, with the
+same-NFE Euler teacher and Heun-256 reference.*
+
+![DMD2 versus PDD at 4 NFE](figures/pdd_vs_dmd_w2.png)
+
+*Matched-noise 4-NFE comparison. DMD2-bsim has the best SW1 but visibly departs
+from the teacher; PDD tracks the teacher's arms.*
+
 ## Frozen clockwise class interpolation (generalization)
 
 `interpolate.py` freezes the seed-42 teacher and sweeps 29 fractional conditions
@@ -216,6 +344,11 @@ Key figures:
 - `figures/comparison_w2.png`, `figures/comparison_w4.png` — all arms vs teachers
 - `figures/trajectory_dmd2_bptt_w2.png` — teacher vs student 4-step progression
 - `figures/training_curves_dmd2_bptt_w2.png`
+- `figures/pdd_samples_w2.png` — PDD NFE 1/2/4/8 vs both teachers
+- `figures/pdd_nfe_sweep_w2.png` — distribution and teacher-RMSE diagnostics
+- `figures/pdd_vs_dmd_w2.png` — matched-noise DMD2 vs PDD at 4 NFE
+- `figures/pdd_samples_w1.png` — clean-field `w=1` control
+- `figures/pdd_training_curves_w2.png` — PDD loss and probe SW1
 
 These numbers match the original experiment's recorded table and the recorded
 clockwise behavior, which validates the extraction.

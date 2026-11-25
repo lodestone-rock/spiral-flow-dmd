@@ -24,7 +24,7 @@ this file), not from the parent research repository.
 python -m unittest discover -s tests -v
 ```
 
-Expected: **19 tests pass** (fast, CPU-only).
+Expected: **36 tests pass** (fast, CPU-only: 19 pipeline + 17 PDD).
 
 ## Fast smoke run (about 1–2 minutes)
 
@@ -37,6 +37,9 @@ python train_flow.py all --device cuda --run-name smoke_teacher \
 python dmd.py all --device cuda --run-name smoke_dmd --teacher-run smoke_teacher \
     --gen-updates 50 --batch-size 256 --pairs 4096 --eval-samples 128 \
     --teacher-steps 8 --log-every 25 --probe-every 50 --scales 2
+python pdd.py all --device cuda --run-name smoke_pdd --teacher-run smoke_teacher \
+    --updates 50 --batch-size 256 --eval-samples 128 --teacher-steps 8 \
+    --log-every 25 --probe-every 50 --probe-samples 64 --scales 2
 python interpolate.py --device cuda --teacher-run smoke_teacher \
     --eval-samples 128 --steps 32 --scales 1 --output-name smoke_interpolation
 ```
@@ -46,21 +49,24 @@ Smoke outputs are intentionally low quality; use them only to check plumbing.
 ## Full reproduction (about 30–40 minutes on an RTX 5090)
 
 ```bash
-./run_all.sh cuda teacher dmd
+./run_all.sh cuda teacher dmd pdd
 ```
 
 This runs, in order:
 
-1. `tests/` (19 unit tests)
+1. `tests/` (36 unit tests)
 2. `train_flow.py all --run-name teacher` (~1 minute)
 3. `dmd.py all --run-name dmd --teacher-run teacher` (~25–30 minutes)
-4. `interpolate.py --teacher-run teacher --scales 1 2` (~1 minute, **no retraining**)
+4. `pdd.py all --run-name pdd --teacher-run teacher --scales 2 --updates 50000`
+   (~2–5 minutes for the toy 50k-update recipe)
+5. `interpolate.py --teacher-run teacher --scales 1 2` (~1 minute, **no retraining**)
 
 To run stages individually:
 
 ```bash
 python train_flow.py all --device cuda --run-name teacher
 python dmd.py all --device cuda --run-name dmd --teacher-run teacher
+python pdd.py all --device cuda --run-name pdd --teacher-run teacher --scales 2 --updates 50000
 python interpolate.py --device cuda --teacher-run teacher --scales 1 2
 ```
 
@@ -75,6 +81,19 @@ python interpolate.py --device cuda --teacher-run teacher --scales 1 2
   - `bsim` = backward simulation, gradient through **one** step only.
   - DMD1 = DM loss + λ=0.25 regression anchor; DMD2 = DM loss only, TTUR 5:1.
   - There is **no GAN loss** and **no EMA** in this implementation.
+- `pdd.py` — Parallel decoding distillation in `s=1−t`.
+  - Widens the teacher's final linear to `N=64` interval heads; all heads read
+    the same block-start feature.
+  - Training draws a block start from the eight student-grid nodes, rolls the
+    student's detached heads to `K=1` sampled head, and regresses it onto the
+    guided teacher's midpoint RK interval mean.
+  - No critic, GAN, JVP, finite differences, or BPTT.
+  - Inference fuses a block's heads into one linear; one checkpoint serves
+    NFE 1/2/4/8. `--data-free`, `--shift`, and Euler `N=128, K=2` are ablations.
+  - **Time convention:** the paper is `t=0` noise → `t=1` data; this repo is
+    the reverse. `pdd.py` predicts `u_s = −v_t`, initializes heads from
+    `−teacher.output`, and uses positive `s` steps. Do not feed the teacher
+    `s` directly.
 - `interpolate.py` — frozen clockwise class sweep `g=7→0`, shared initial
   noise, rotated geometric references. Reads an existing teacher checkpoint.
 - `run_all.sh` — end-to-end runner.
@@ -101,6 +120,14 @@ Interpolation: `runs/<teacher-run>/interpolation_s<steps>_n<n>_seed<seed>/`
 - `clockwise_4_to_3_w*.png`
 - `clockwise_paths_w*.png`
 
+PDD: `runs/<pdd-run>/`
+- `<arm>/generator.pt`, `<arm>/history.json`, `<arm>/training_curves.png`
+- `evaluation_s256_n4096_seed1234/summary.json` (SW1/HDR50, diversity, RMSE to
+  the teacher grid and Heun-256 under shared noise)
+- `evaluation_*/<arm>_samples.npz` (matched-noise arrays)
+- `pdd_samples_w2.png`, `pdd_nfe_sweep_w2.png`, `pdd_vs_dmd_w2.png`
+- curated numbers: `results/pdd_summary.json`
+
 ## Repo invariants
 
 - Do not overwrite recorded outputs. Pass a fresh `--run-name`,
@@ -112,5 +139,12 @@ Interpolation: `runs/<teacher-run>/interpolation_s<steps>_n<n>_seed<seed>/`
 - Intermediate interpolation conditions were never trained. Rotated references
   are a geometric continuation, not ground truth; the scalar encoding has no
   periodic `0→7` wrap.
+- In PDD, keep the `s=1−t` bridge explicit: student velocities are `u_s=−v_t`,
+  head init is `−teacher.output`, and all `s` steps are positive. Training and
+  sampling must both start at `s=0` (noise).
+- Report PDD against the **teacher trajectory** as well as the exact target.
+  DMD can beat the guided teacher on SW1 by partially undoing CFG; PDD instead
+  matches the guided field, so a higher SW1 with much lower teacher RMSE is the
+  expected result, not a failure.
 - Update `README.md` and `figures/` when adding user-facing results, and rebuild
   `experiments/spiral_flow_dmd.zip` if a shareable archive is requested.

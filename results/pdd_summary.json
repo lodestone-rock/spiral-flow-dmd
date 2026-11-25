@@ -1,0 +1,836 @@
+{
+  "method": "PDD (parallel decoding distillation), spiral port",
+  "paper": "arXiv:2607.26004v1",
+  "time_bridge": "s = 1 - t; student predicts u_s = -v_t; all steps positive",
+  "recipe": {
+    "grid_steps": 64,
+    "block_min": 8,
+    "block_max": 64,
+    "shift": 1.0,
+    "rk": "midpoint",
+    "supervised_heads": 1,
+    "data_free": false,
+    "updates": 200000,
+    "batch_size": 2048,
+    "lr": 0.001,
+    "scale": 2.0,
+    "seed": 42,
+    "eval_samples": 4096,
+    "eval_seed": 1234,
+    "teacher_steps": 256
+  },
+  "main": {
+    "run": "pdd200_lr1e3",
+    "summary": [
+      {
+        "arm": "pdd_midpoint_w2",
+        "scale": 2.0,
+        "rk": "midpoint",
+        "nfe": 1,
+        "student_sw1": 0.1253025009845206,
+        "teacher_grid_sw1": 0.08213199072017409,
+        "teacher_256_sw1": 0.08208792371714073,
+        "teacher_nfe_sw1": 1.2922709998365305,
+        "teacher_euler_sw1": 0.28462006025131487,
+        "student_hdr50": 0.24676513671875,
+        "diversity": 0.1689124797043738,
+        "teacher_grid_diversity": 0.24838368655990115,
+        "teacher_256_diversity": 0.24808216528929153,
+        "rmse_teacher_grid": 0.09244388805963613,
+        "mean_l2_teacher_grid": 0.0953450286368781
+      },
+      {
+        "arm": "pdd_midpoint_w2",
+        "scale": 2.0,
+        "rk": "midpoint",
+        "nfe": 2,
+        "student_sw1": 0.09414992318464299,
+        "teacher_grid_sw1": 0.08213199072017409,
+        "teacher_256_sw1": 0.08208792371714073,
+        "teacher_nfe_sw1": 0.5446867938170254,
+        "teacher_euler_sw1": 0.2622364977183129,
+        "student_hdr50": 0.383453369140625,
+        "diversity": 0.2221604555677874,
+        "teacher_grid_diversity": 0.24838368655990115,
+        "teacher_256_diversity": 0.24808216528929153,
+        "rmse_teacher_grid": 0.052249831666533075,
+        "mean_l2_teacher_grid": 0.04819612284154371
+      },
+      {
+        "arm": "pdd_midpoint_w2",
+        "scale": 2.0,
+        "rk": "midpoint",
+        "nfe": 4,
+        "student_sw1": 0.08117182463846048,
+        "teacher_grid_sw1": 0.08213199072017409,
+        "teacher_256_sw1": 0.08208792371714073,
+        "teacher_nfe_sw1": 0.18245330238519045,
+        "teacher_euler_sw1": 0.13828963547329484,
+        "student_hdr50": 0.57025146484375,
+        "diversity": 0.25187745081211566,
+        "teacher_grid_diversity": 0.24838368655990115,
+        "teacher_256_diversity": 0.24808216528929153,
+        "rmse_teacher_grid": 0.028768778431658336,
+        "mean_l2_teacher_grid": 0.02737105714932521
+      },
+      {
+        "arm": "pdd_midpoint_w2",
+        "scale": 2.0,
+        "rk": "midpoint",
+        "nfe": 8,
+        "student_sw1": 0.07635245558878792,
+        "teacher_grid_sw1": 0.08213199072017409,
+        "teacher_256_sw1": 0.08208792371714073,
+        "teacher_nfe_sw1": 0.14232005972925138,
+        "teacher_euler_sw1": 0.10592967257339375,
+        "student_hdr50": 0.605133056640625,
+        "diversity": 0.26691786309761634,
+        "teacher_grid_diversity": 0.24838368655990115,
+        "teacher_256_diversity": 0.24808216528929153,
+        "rmse_teacher_grid": 0.02410857038266134,
+        "mean_l2_teacher_grid": 0.025058912555535117
+      },
+      {
+        "arm": "pdd_midpoint_w4",
+        "scale": 4.0,
+        "rk": "midpoint",
+        "nfe": 1,
+        "student_sw1": 0.1642822217319008,
+        "teacher_grid_sw1": 0.13592292310003784,
+        "teacher_256_sw1": 0.1355374761804342,
+        "teacher_nfe_sw1": 2.4639049500578576,
+        "teacher_euler_sw1": 0.7818350011315857,
+        "student_hdr50": 0.16845703125,
+        "diversity": 0.12538924745008484,
+        "teacher_grid_diversity": 0.1541814872433026,
+        "teacher_256_diversity": 0.15352605503500238,
+        "rmse_teacher_grid": 0.09780471170175342,
+        "mean_l2_teacher_grid": 0.10475652927099434
+      },
+      {
+        "arm": "pdd_midpoint_w4",
+        "scale": 4.0,
+        "rk": "midpoint",
+        "nfe": 2,
+        "student_sw1": 0.1335077560951786,
+        "teacher_grid_sw1": 0.13592292310003784,
+        "teacher_256_sw1": 0.1355374761804342,
+        "teacher_nfe_sw1": 0.9357593203769299,
+        "teacher_euler_sw1": 0.5125001995615295,
+        "student_hdr50": 0.254364013671875,
+        "diversity": 0.17822124979408965,
+        "teacher_grid_diversity": 0.1541814872433026,
+        "teacher_256_diversity": 0.15352605503500238,
+        "rmse_teacher_grid": 0.05020422888043761,
+        "mean_l2_teacher_grid": 0.052726774451610295
+      },
+      {
+        "arm": "pdd_midpoint_w4",
+        "scale": 4.0,
+        "rk": "midpoint",
+        "nfe": 4,
+        "student_sw1": 0.1422801064331577,
+        "teacher_grid_sw1": 0.13592292310003784,
+        "teacher_256_sw1": 0.1355374761804342,
+        "teacher_nfe_sw1": 0.41367738532610043,
+        "teacher_euler_sw1": 0.18889435399748022,
+        "student_hdr50": 0.267425537109375,
+        "diversity": 0.16568119134025083,
+        "teacher_grid_diversity": 0.1541814872433026,
+        "teacher_256_diversity": 0.15352605503500238,
+        "rmse_teacher_grid": 0.05173728712133339,
+        "mean_l2_teacher_grid": 0.05766141281079895
+      },
+      {
+        "arm": "pdd_midpoint_w4",
+        "scale": 4.0,
+        "rk": "midpoint",
+        "nfe": 8,
+        "student_sw1": 0.1418640676201142,
+        "teacher_grid_sw1": 0.13592292310003784,
+        "teacher_256_sw1": 0.1355374761804342,
+        "teacher_nfe_sw1": 0.33207030273021265,
+        "teacher_euler_sw1": 0.1800607611457321,
+        "student_hdr50": 0.451141357421875,
+        "diversity": 0.1683537651420093,
+        "teacher_grid_diversity": 0.1541814872433026,
+        "teacher_256_diversity": 0.15352605503500238,
+        "rmse_teacher_grid": 0.04443081215516519,
+        "mean_l2_teacher_grid": 0.0485908680244464
+      }
+    ]
+  },
+  "ablations": {
+    "pdd50_lr1e3": {
+      "description": "50k updates, lr 1e-3 (convergence check)",
+      "summary": [
+        {
+          "arm": "pdd_midpoint_w2",
+          "scale": 2.0,
+          "rk": "midpoint",
+          "nfe": 1,
+          "student_sw1": 0.12907970757746712,
+          "teacher_grid_sw1": 0.08213199072017409,
+          "teacher_256_sw1": 0.08208792371714073,
+          "teacher_nfe_sw1": 1.2922709998365305,
+          "student_hdr50": 0.233612060546875,
+          "diversity": 0.16176215577560873,
+          "teacher_grid_diversity": 0.24838368655990115,
+          "teacher_256_diversity": 0.24808216528929153,
+          "rmse_teacher_grid": 0.09685886778384258,
+          "mean_l2_teacher_grid": 0.10242909592839006
+        },
+        {
+          "arm": "pdd_midpoint_w2",
+          "scale": 2.0,
+          "rk": "midpoint",
+          "nfe": 2,
+          "student_sw1": 0.0984093406580388,
+          "teacher_grid_sw1": 0.08213199072017409,
+          "teacher_256_sw1": 0.08208792371714073,
+          "teacher_nfe_sw1": 0.5446867938170254,
+          "student_hdr50": 0.3658447265625,
+          "diversity": 0.21348364423141636,
+          "teacher_grid_diversity": 0.24838368655990115,
+          "teacher_256_diversity": 0.24808216528929153,
+          "rmse_teacher_grid": 0.05412827939438948,
+          "mean_l2_teacher_grid": 0.04985075198227191
+        },
+        {
+          "arm": "pdd_midpoint_w2",
+          "scale": 2.0,
+          "rk": "midpoint",
+          "nfe": 4,
+          "student_sw1": 0.08159085968095477,
+          "teacher_grid_sw1": 0.08213199072017409,
+          "teacher_256_sw1": 0.08208792371714073,
+          "teacher_nfe_sw1": 0.18245330238519045,
+          "student_hdr50": 0.5509033203125,
+          "diversity": 0.24920793390009877,
+          "teacher_grid_diversity": 0.24838368655990115,
+          "teacher_256_diversity": 0.24808216528929153,
+          "rmse_teacher_grid": 0.028717551161935095,
+          "mean_l2_teacher_grid": 0.026910859936823815
+        },
+        {
+          "arm": "pdd_midpoint_w2",
+          "scale": 2.0,
+          "rk": "midpoint",
+          "nfe": 8,
+          "student_sw1": 0.07562245868140852,
+          "teacher_grid_sw1": 0.08213199072017409,
+          "teacher_256_sw1": 0.08208792371714073,
+          "teacher_nfe_sw1": 0.14232005972925138,
+          "student_hdr50": 0.614288330078125,
+          "diversity": 0.2683466790268966,
+          "teacher_grid_diversity": 0.24838368655990115,
+          "teacher_256_diversity": 0.24808216528929153,
+          "rmse_teacher_grid": 0.02619466123203869,
+          "mean_l2_teacher_grid": 0.027132632349017905
+        },
+        {
+          "arm": "pdd_midpoint_w4",
+          "scale": 4.0,
+          "rk": "midpoint",
+          "nfe": 1,
+          "student_sw1": 0.1659623365193924,
+          "teacher_grid_sw1": 0.13592292310003784,
+          "teacher_256_sw1": 0.1355374761804342,
+          "teacher_nfe_sw1": 2.4639049500578576,
+          "student_hdr50": 0.122955322265625,
+          "diversity": 0.12833994229559875,
+          "teacher_grid_diversity": 0.1541814872433026,
+          "teacher_256_diversity": 0.15352605503500238,
+          "rmse_teacher_grid": 0.1082402164805918,
+          "mean_l2_teacher_grid": 0.11867393438249024
+        },
+        {
+          "arm": "pdd_midpoint_w4",
+          "scale": 4.0,
+          "rk": "midpoint",
+          "nfe": 2,
+          "student_sw1": 0.13642387542863063,
+          "teacher_grid_sw1": 0.13592292310003784,
+          "teacher_256_sw1": 0.1355374761804342,
+          "teacher_nfe_sw1": 0.9357593203769299,
+          "student_hdr50": 0.24102783203125,
+          "diversity": 0.16578497151222676,
+          "teacher_grid_diversity": 0.1541814872433026,
+          "teacher_256_diversity": 0.15352605503500238,
+          "rmse_teacher_grid": 0.05414311262709985,
+          "mean_l2_teacher_grid": 0.05582136999547366
+        },
+        {
+          "arm": "pdd_midpoint_w4",
+          "scale": 4.0,
+          "rk": "midpoint",
+          "nfe": 4,
+          "student_sw1": 0.14271628413289655,
+          "teacher_grid_sw1": 0.13592292310003784,
+          "teacher_256_sw1": 0.1355374761804342,
+          "teacher_nfe_sw1": 0.41367738532610043,
+          "student_hdr50": 0.274932861328125,
+          "diversity": 0.167053106384516,
+          "teacher_grid_diversity": 0.1541814872433026,
+          "teacher_256_diversity": 0.15352605503500238,
+          "rmse_teacher_grid": 0.054040079048764414,
+          "mean_l2_teacher_grid": 0.059184920671914644
+        },
+        {
+          "arm": "pdd_midpoint_w4",
+          "scale": 4.0,
+          "rk": "midpoint",
+          "nfe": 8,
+          "student_sw1": 0.14107520786539487,
+          "teacher_grid_sw1": 0.13592292310003784,
+          "teacher_256_sw1": 0.1355374761804342,
+          "teacher_nfe_sw1": 0.33207030273021265,
+          "student_hdr50": 0.421630859375,
+          "diversity": 0.17308711391874687,
+          "teacher_grid_diversity": 0.1541814872433026,
+          "teacher_256_diversity": 0.15352605503500238,
+          "rmse_teacher_grid": 0.049444177687800815,
+          "mean_l2_teacher_grid": 0.054109122642860184
+        }
+      ]
+    },
+    "pdd50_lr1e4": {
+      "description": "50k updates, lr 1e-4 (lr ablation)",
+      "summary": [
+        {
+          "arm": "pdd_midpoint_w2_lr0.0001",
+          "scale": 2.0,
+          "rk": "midpoint",
+          "nfe": 1,
+          "student_sw1": 0.1394220019046975,
+          "teacher_grid_sw1": 0.08213199072017409,
+          "teacher_256_sw1": 0.08208792371714073,
+          "teacher_nfe_sw1": 1.2922709998365305,
+          "teacher_euler_sw1": 0.28462006025131487,
+          "student_hdr50": 0.2340087890625,
+          "diversity": 0.14666800530198942,
+          "teacher_grid_diversity": 0.24838368655990115,
+          "teacher_256_diversity": 0.24808216528929153,
+          "rmse_teacher_grid": 0.10942896074127045,
+          "mean_l2_teacher_grid": 0.1201855256148533
+        },
+        {
+          "arm": "pdd_midpoint_w2_lr0.0001",
+          "scale": 2.0,
+          "rk": "midpoint",
+          "nfe": 2,
+          "student_sw1": 0.11421523955678228,
+          "teacher_grid_sw1": 0.08213199072017409,
+          "teacher_256_sw1": 0.08208792371714073,
+          "teacher_nfe_sw1": 0.5446867938170254,
+          "teacher_euler_sw1": 0.2622364977183129,
+          "student_hdr50": 0.362060546875,
+          "diversity": 0.17876380188796331,
+          "teacher_grid_diversity": 0.24838368655990115,
+          "teacher_256_diversity": 0.24808216528929153,
+          "rmse_teacher_grid": 0.06809048094882379,
+          "mean_l2_teacher_grid": 0.06870009417679372
+        },
+        {
+          "arm": "pdd_midpoint_w2_lr0.0001",
+          "scale": 2.0,
+          "rk": "midpoint",
+          "nfe": 4,
+          "student_sw1": 0.08790823620564753,
+          "teacher_grid_sw1": 0.08213199072017409,
+          "teacher_256_sw1": 0.08208792371714073,
+          "teacher_nfe_sw1": 0.18245330238519045,
+          "teacher_euler_sw1": 0.13828963547329484,
+          "student_hdr50": 0.47894287109375,
+          "diversity": 0.2354688094750621,
+          "teacher_grid_diversity": 0.24838368655990115,
+          "teacher_256_diversity": 0.24808216528929153,
+          "rmse_teacher_grid": 0.032236294029208926,
+          "mean_l2_teacher_grid": 0.031901848060470375
+        },
+        {
+          "arm": "pdd_midpoint_w2_lr0.0001",
+          "scale": 2.0,
+          "rk": "midpoint",
+          "nfe": 8,
+          "student_sw1": 0.07724746563634069,
+          "teacher_grid_sw1": 0.08213199072017409,
+          "teacher_256_sw1": 0.08208792371714073,
+          "teacher_nfe_sw1": 0.14232005972925138,
+          "teacher_euler_sw1": 0.10592967257339375,
+          "student_hdr50": 0.67437744140625,
+          "diversity": 0.2673014415941746,
+          "teacher_grid_diversity": 0.24838368655990115,
+          "teacher_256_diversity": 0.24808216528929153,
+          "rmse_teacher_grid": 0.02914737936084873,
+          "mean_l2_teacher_grid": 0.029097429027303945
+        },
+        {
+          "arm": "pdd_midpoint_w4_lr0.0001",
+          "scale": 4.0,
+          "rk": "midpoint",
+          "nfe": 1,
+          "student_sw1": 0.17314566214274646,
+          "teacher_grid_sw1": 0.13592292310003784,
+          "teacher_256_sw1": 0.1355374761804342,
+          "teacher_nfe_sw1": 2.4639049500578576,
+          "teacher_euler_sw1": 0.7818350011315857,
+          "student_hdr50": 0.095672607421875,
+          "diversity": 0.17035862913447614,
+          "teacher_grid_diversity": 0.1541814872433026,
+          "teacher_256_diversity": 0.15352605503500238,
+          "rmse_teacher_grid": 0.13220909014984383,
+          "mean_l2_teacher_grid": 0.1595335198528824
+        },
+        {
+          "arm": "pdd_midpoint_w4_lr0.0001",
+          "scale": 4.0,
+          "rk": "midpoint",
+          "nfe": 2,
+          "student_sw1": 0.14512971255366924,
+          "teacher_grid_sw1": 0.13592292310003784,
+          "teacher_256_sw1": 0.1355374761804342,
+          "teacher_nfe_sw1": 0.9357593203769299,
+          "teacher_euler_sw1": 0.5125001995615295,
+          "student_hdr50": 0.122802734375,
+          "diversity": 0.14113817272302842,
+          "teacher_grid_diversity": 0.1541814872433026,
+          "teacher_256_diversity": 0.15352605503500238,
+          "rmse_teacher_grid": 0.08258498728191331,
+          "mean_l2_teacher_grid": 0.09643119445454984
+        },
+        {
+          "arm": "pdd_midpoint_w4_lr0.0001",
+          "scale": 4.0,
+          "rk": "midpoint",
+          "nfe": 4,
+          "student_sw1": 0.14555915964710459,
+          "teacher_grid_sw1": 0.13592292310003784,
+          "teacher_256_sw1": 0.1355374761804342,
+          "teacher_nfe_sw1": 0.41367738532610043,
+          "teacher_euler_sw1": 0.18889435399748022,
+          "student_hdr50": 0.28509521484375,
+          "diversity": 0.16724845225340512,
+          "teacher_grid_diversity": 0.1541814872433026,
+          "teacher_256_diversity": 0.15352605503500238,
+          "rmse_teacher_grid": 0.06458020822442338,
+          "mean_l2_teacher_grid": 0.0701655378238916
+        },
+        {
+          "arm": "pdd_midpoint_w4_lr0.0001",
+          "scale": 4.0,
+          "rk": "midpoint",
+          "nfe": 8,
+          "student_sw1": 0.14056088003136302,
+          "teacher_grid_sw1": 0.13592292310003784,
+          "teacher_256_sw1": 0.1355374761804342,
+          "teacher_nfe_sw1": 0.33207030273021265,
+          "teacher_euler_sw1": 0.1800607611457321,
+          "student_hdr50": 0.209686279296875,
+          "diversity": 0.18170947920747998,
+          "teacher_grid_diversity": 0.1541814872433026,
+          "teacher_256_diversity": 0.15352605503500238,
+          "rmse_teacher_grid": 0.06299254750010434,
+          "mean_l2_teacher_grid": 0.0648840391662655
+        }
+      ]
+    },
+    "pdd_w1": {
+      "description": "50k updates, w=1 (clean-field control)",
+      "summary": [
+        {
+          "arm": "pdd_midpoint_w1",
+          "scale": 1.0,
+          "rk": "midpoint",
+          "nfe": 1,
+          "student_sw1": 0.060965197455161255,
+          "teacher_grid_sw1": 0.017285385468005263,
+          "teacher_256_sw1": 0.017273388493217155,
+          "teacher_nfe_sw1": 1.2789800526644308,
+          "teacher_euler_sw1": 0.1709325042688121,
+          "student_hdr50": 0.1082763671875,
+          "diversity": 0.3348177067745468,
+          "teacher_grid_diversity": 0.4094563362181235,
+          "teacher_256_diversity": 0.40943484087697113,
+          "rmse_teacher_grid": 0.11983788946240533,
+          "mean_l2_teacher_grid": 0.13321404196616604
+        },
+        {
+          "arm": "pdd_midpoint_w1",
+          "scale": 1.0,
+          "rk": "midpoint",
+          "nfe": 2,
+          "student_sw1": 0.04341489928704785,
+          "teacher_grid_sw1": 0.017285385468005263,
+          "teacher_256_sw1": 0.017273388493217155,
+          "teacher_nfe_sw1": 0.5804739300675035,
+          "teacher_euler_sw1": 0.1403443771009967,
+          "student_hdr50": 0.15594482421875,
+          "diversity": 0.3427660733430845,
+          "teacher_grid_diversity": 0.4094563362181235,
+          "teacher_256_diversity": 0.40943484087697113,
+          "rmse_teacher_grid": 0.09789336157916569,
+          "mean_l2_teacher_grid": 0.09924983128228591
+        },
+        {
+          "arm": "pdd_midpoint_w1",
+          "scale": 1.0,
+          "rk": "midpoint",
+          "nfe": 4,
+          "student_sw1": 0.022643825906118884,
+          "teacher_grid_sw1": 0.017285385468005263,
+          "teacher_256_sw1": 0.017273388493217155,
+          "teacher_nfe_sw1": 0.17497591896176334,
+          "teacher_euler_sw1": 0.07695548130870217,
+          "student_hdr50": 0.294708251953125,
+          "diversity": 0.37856114360107007,
+          "teacher_grid_diversity": 0.4094563362181235,
+          "teacher_256_diversity": 0.40943484087697113,
+          "rmse_teacher_grid": 0.05784141579282598,
+          "mean_l2_teacher_grid": 0.05426801837639554
+        },
+        {
+          "arm": "pdd_midpoint_w1",
+          "scale": 1.0,
+          "rk": "midpoint",
+          "nfe": 8,
+          "student_sw1": 0.019598726352968995,
+          "teacher_grid_sw1": 0.017285385468005263,
+          "teacher_256_sw1": 0.017273388493217155,
+          "teacher_nfe_sw1": 0.03994841722262933,
+          "teacher_euler_sw1": 0.03230702971382912,
+          "student_hdr50": 0.366455078125,
+          "diversity": 0.4100957035533337,
+          "teacher_grid_diversity": 0.4094563362181235,
+          "teacher_256_diversity": 0.40943484087697113,
+          "rmse_teacher_grid": 0.03788348509009363,
+          "mean_l2_teacher_grid": 0.029376397767026587
+        }
+      ]
+    },
+    "pdd_shift2": {
+      "description": "50k updates, w=2, shifted grid s=2 (time-grid ablation)",
+      "summary": [
+        {
+          "arm": "pdd_midpoint_w2_shift2",
+          "scale": 2.0,
+          "rk": "midpoint",
+          "nfe": 1,
+          "student_sw1": 0.12006728808427122,
+          "teacher_grid_sw1": 0.08244087795684844,
+          "teacher_256_sw1": 0.08208792371714073,
+          "teacher_nfe_sw1": 1.2922709998365305,
+          "teacher_euler_sw1": 0.28462006025131487,
+          "student_hdr50": 0.207489013671875,
+          "diversity": 0.17943756761974905,
+          "teacher_grid_diversity": 0.24974832432489635,
+          "teacher_256_diversity": 0.24808216528929153,
+          "rmse_teacher_grid": 0.08977503133334881,
+          "mean_l2_teacher_grid": 0.09305845848710591
+        },
+        {
+          "arm": "pdd_midpoint_w2_shift2",
+          "scale": 2.0,
+          "rk": "midpoint",
+          "nfe": 2,
+          "student_sw1": 0.10768390871946669,
+          "teacher_grid_sw1": 0.08244087795684844,
+          "teacher_256_sw1": 0.08208792371714073,
+          "teacher_nfe_sw1": 0.5446867938170254,
+          "teacher_euler_sw1": 0.2622364977183129,
+          "student_hdr50": 0.274505615234375,
+          "diversity": 0.20094730341473582,
+          "teacher_grid_diversity": 0.24974832432489635,
+          "teacher_256_diversity": 0.24808216528929153,
+          "rmse_teacher_grid": 0.06453663581948364,
+          "mean_l2_teacher_grid": 0.06401844246057094
+        },
+        {
+          "arm": "pdd_midpoint_w2_shift2",
+          "scale": 2.0,
+          "rk": "midpoint",
+          "nfe": 4,
+          "student_sw1": 0.08680520788171961,
+          "teacher_grid_sw1": 0.08244087795684844,
+          "teacher_256_sw1": 0.08208792371714073,
+          "teacher_nfe_sw1": 0.18245330238519045,
+          "teacher_euler_sw1": 0.13828963547329484,
+          "student_hdr50": 0.358917236328125,
+          "diversity": 0.24043296959521038,
+          "teacher_grid_diversity": 0.24974832432489635,
+          "teacher_256_diversity": 0.24808216528929153,
+          "rmse_teacher_grid": 0.0401793120691987,
+          "mean_l2_teacher_grid": 0.039567049539300785
+        },
+        {
+          "arm": "pdd_midpoint_w2_shift2",
+          "scale": 2.0,
+          "rk": "midpoint",
+          "nfe": 8,
+          "student_sw1": 0.0765190725614515,
+          "teacher_grid_sw1": 0.08244087795684844,
+          "teacher_256_sw1": 0.08208792371714073,
+          "teacher_nfe_sw1": 0.14232005972925138,
+          "teacher_euler_sw1": 0.10592967257339375,
+          "student_hdr50": 0.537445068359375,
+          "diversity": 0.26518828427953633,
+          "teacher_grid_diversity": 0.24974832432489635,
+          "teacher_256_diversity": 0.24808216528929153,
+          "rmse_teacher_grid": 0.028582542738033165,
+          "mean_l2_teacher_grid": 0.0290265062525812
+        }
+      ]
+    },
+    "pdd_euler128": {
+      "description": "50k updates, w=2, N=128 Euler, K=2 (paper's other recipe)",
+      "summary": [
+        {
+          "arm": "pdd_euler_w2_k2_n128_l16",
+          "scale": 2.0,
+          "rk": "euler",
+          "nfe": 1,
+          "student_sw1": 0.1337074442339477,
+          "teacher_grid_sw1": 0.08370442975820339,
+          "teacher_256_sw1": 0.08208792371714073,
+          "teacher_nfe_sw1": 1.2922709998365305,
+          "teacher_euler_sw1": 0.28462006025131487,
+          "student_hdr50": 0.260711669921875,
+          "diversity": 0.15044719717768074,
+          "teacher_grid_diversity": 0.24374783237598047,
+          "teacher_256_diversity": 0.24808216528929153,
+          "rmse_teacher_grid": 0.09982772596401905,
+          "mean_l2_teacher_grid": 0.10534583657477864
+        },
+        {
+          "arm": "pdd_euler_w2_k2_n128_l16",
+          "scale": 2.0,
+          "rk": "euler",
+          "nfe": 2,
+          "student_sw1": 0.10176073785257414,
+          "teacher_grid_sw1": 0.08370442975820339,
+          "teacher_256_sw1": 0.08208792371714073,
+          "teacher_nfe_sw1": 0.5446867938170254,
+          "teacher_euler_sw1": 0.2622364977183129,
+          "student_hdr50": 0.433990478515625,
+          "diversity": 0.20365882233815888,
+          "teacher_grid_diversity": 0.24374783237598047,
+          "teacher_256_diversity": 0.24808216528929153,
+          "rmse_teacher_grid": 0.05544333776724152,
+          "mean_l2_teacher_grid": 0.05114006163936371
+        },
+        {
+          "arm": "pdd_euler_w2_k2_n128_l16",
+          "scale": 2.0,
+          "rk": "euler",
+          "nfe": 4,
+          "student_sw1": 0.0839277582218272,
+          "teacher_grid_sw1": 0.08370442975820339,
+          "teacher_256_sw1": 0.08208792371714073,
+          "teacher_nfe_sw1": 0.18245330238519045,
+          "teacher_euler_sw1": 0.13828963547329484,
+          "student_hdr50": 0.5657958984375,
+          "diversity": 0.24293284654136232,
+          "teacher_grid_diversity": 0.24374783237598047,
+          "teacher_256_diversity": 0.24808216528929153,
+          "rmse_teacher_grid": 0.028625459442885522,
+          "mean_l2_teacher_grid": 0.026744918998610794
+        },
+        {
+          "arm": "pdd_euler_w2_k2_n128_l16",
+          "scale": 2.0,
+          "rk": "euler",
+          "nfe": 8,
+          "student_sw1": 0.07761357278406308,
+          "teacher_grid_sw1": 0.08370442975820339,
+          "teacher_256_sw1": 0.08208792371714073,
+          "teacher_nfe_sw1": 0.14232005972925138,
+          "teacher_euler_sw1": 0.10592967257339375,
+          "student_hdr50": 0.631378173828125,
+          "diversity": 0.26320017494084613,
+          "teacher_grid_diversity": 0.24374783237598047,
+          "teacher_256_diversity": 0.24808216528929153,
+          "rmse_teacher_grid": 0.02600581825044589,
+          "mean_l2_teacher_grid": 0.026805606057025935
+        }
+      ]
+    }
+  },
+  "dmd_baselines": {
+    "dmd1_bptt_w2": {
+      "student_sw1": 0.10046657687600585,
+      "student_hdr50": 0.175506591796875,
+      "student_center": 3.194294650747322,
+      "diversity": {
+        "mean_pairwise_distance_by_class": [
+          0.29286879664451276,
+          0.23670350319639735,
+          0.259332763485689,
+          0.2194839814124938,
+          0.2395806768692787,
+          0.25758370693207244,
+          0.23253355706779744,
+          0.28992344063013764
+        ],
+        "mean_pairwise_distance": 0.2535013032797974
+      },
+      "to_teacher": {
+        "rmse": 0.22945389362665075,
+        "mean_l2": 0.2605517270932086
+      }
+    },
+    "dmd1_bptt_w4": {
+      "student_sw1": 0.12393688810482875,
+      "student_hdr50": 0.402862548828125,
+      "student_center": 1.348758944668011,
+      "diversity": {
+        "mean_pairwise_distance_by_class": [
+          0.255815026231534,
+          0.18830173829841929,
+          0.1681243601381929,
+          0.155085634190457,
+          0.18188405224835852,
+          0.18109062075914348,
+          0.1721151090504224,
+          0.2532668461888574
+        ],
+        "mean_pairwise_distance": 0.19446042338817313
+      },
+      "to_teacher": {
+        "rmse": 0.1860930322043749,
+        "mean_l2": 0.21331888820045203
+      }
+    },
+    "dmd1_bsim_w2": {
+      "student_sw1": 0.10102783887971689,
+      "student_hdr50": 0.19573974609375,
+      "student_center": 2.211850007082555,
+      "diversity": {
+        "mean_pairwise_distance_by_class": [
+          0.32937911198230674,
+          0.271641530346932,
+          0.23496134551496653,
+          0.2141907091108061,
+          0.245129905478807,
+          0.24626725399245084,
+          0.2509234503471879,
+          0.2815560139655728
+        ],
+        "mean_pairwise_distance": 0.2592561650923787
+      },
+      "to_teacher": {
+        "rmse": 0.2557052639686603,
+        "mean_l2": 0.2934412848587402
+      }
+    },
+    "dmd1_bsim_w4": {
+      "student_sw1": 0.13511528764983322,
+      "student_hdr50": 0.304779052734375,
+      "student_center": 1.8108771009848619,
+      "diversity": {
+        "mean_pairwise_distance_by_class": [
+          0.22098344992437627,
+          0.2206084222622072,
+          0.15527191907797724,
+          0.1477594359747823,
+          0.1634092543719055,
+          0.18321010797619297,
+          0.14913667489730362,
+          0.21845995507286306
+        ],
+        "mean_pairwise_distance": 0.18235490244470104
+      },
+      "to_teacher": {
+        "rmse": 0.22756023215544932,
+        "mean_l2": 0.27087191477681394
+      }
+    },
+    "dmd2_bptt_w2": {
+      "student_sw1": 0.08069758024784984,
+      "student_hdr50": 0.4803466796875,
+      "student_center": 0.8918987746885587,
+      "diversity": {
+        "mean_pairwise_distance_by_class": [
+          0.3361605647336051,
+          0.27451198420067857,
+          0.27198251610460145,
+          0.2347777485810426,
+          0.2777338947869556,
+          0.28084945364780933,
+          0.26015053595914894,
+          0.276618442874443
+        ],
+        "mean_pairwise_distance": 0.27659814261103555
+      },
+      "to_teacher": {
+        "rmse": 0.24374199757546375,
+        "mean_l2": 0.27682820096027017
+      }
+    },
+    "dmd2_bptt_w4": {
+      "student_sw1": 0.12139188176579432,
+      "student_hdr50": 0.38543701171875,
+      "student_center": 1.3467722966703357,
+      "diversity": {
+        "mean_pairwise_distance_by_class": [
+          0.23300874175786013,
+          0.17967246686654562,
+          0.1723847164612158,
+          0.14946719195080174,
+          0.19236402030297342,
+          0.18595373121020609,
+          0.16600012498969008,
+          0.2309970815394974
+        ],
+        "mean_pairwise_distance": 0.18873100938484877
+      },
+      "to_teacher": {
+        "rmse": 0.19415973103772022,
+        "mean_l2": 0.22433951246779213
+      }
+    },
+    "dmd2_bsim_w2": {
+      "student_sw1": 0.06976056247996552,
+      "student_hdr50": 0.195892333984375,
+      "student_center": 2.117849730309814,
+      "diversity": {
+        "mean_pairwise_distance_by_class": [
+          0.29501906821528745,
+          0.2826192997593915,
+          0.29172650991291954,
+          0.27845101171002834,
+          0.3754512168357099,
+          0.3420055843806413,
+          0.2835776920116837,
+          0.30763147744931996
+        ],
+        "mean_pairwise_distance": 0.3070602325343727
+      },
+      "to_teacher": {
+        "rmse": 0.2558938874845124,
+        "mean_l2": 0.2925666154647684
+      }
+    },
+    "dmd2_bsim_w4": {
+      "student_sw1": 0.11891839619003149,
+      "student_hdr50": 0.2459716796875,
+      "student_center": 1.9192700145545178,
+      "diversity": {
+        "mean_pairwise_distance_by_class": [
+          0.2519063217050013,
+          0.2126196716291906,
+          0.18589887819034062,
+          0.15380822769632263,
+          0.19712746388670702,
+          0.16395768424451782,
+          0.20711336569266584,
+          0.19683096610873232
+        ],
+        "mean_pairwise_distance": 0.19615782239418478
+      },
+      "to_teacher": {
+        "rmse": 0.16524709564701798,
+        "mean_l2": 0.18697369392985688
+      }
+    }
+  }
+}
