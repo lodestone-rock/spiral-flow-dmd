@@ -11,9 +11,11 @@ PYTHON="${PYTHON:-python}"
 "$PYTHON" -m unittest discover -s tests -v
 "$PYTHON" train_flow.py all --device "$DEVICE" --run-name "$TEACHER_RUN"
 "$PYTHON" dmd.py all --device "$DEVICE" --run-name "$DMD_RUN" --teacher-run "$TEACHER_RUN"
+"$PYTHON" interpolate.py --device "$DEVICE" --teacher-run "$TEACHER_RUN"
 
 echo "Done. Figures:"
 echo "  runs/$TEACHER_RUN/teacher_samples.png"
+echo "  runs/$TEACHER_RUN/interpolation_*/clockwise_paths_w1.png"
 echo "  runs/$DMD_RUN/comparison_w2.png"
 echo "  runs/$DMD_RUN/comparison_w4.png"
 echo "  runs/$DMD_RUN/evaluation_*/<arm>/trajectory_progression.png"

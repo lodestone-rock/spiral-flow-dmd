@@ -2,9 +2,11 @@
 
 A minimal, self-contained extract of the eight-arm "twisted Gaussians" toy
 experiment: train a class-conditional CFG flow-matching teacher on the spiral,
-then distill it into a 4-step generator with the DMD family of losses. Only the
-flow-matching and DMD/DMD2 code is included; the guidance, pruning, adversarial,
-and architecture-ablation studies from the original experiment are not.
+distill it into a 4-step generator with the DMD family of losses, and probe the
+teacher's frozen clockwise interpolation between class labels. Only the
+flow-matching, DMD/DMD2, and class-interpolation code is included; the guidance,
+pruning, adversarial, and architecture-ablation studies from the original
+experiment are not.
 
 ![teacher samples](figures/teacher_samples.png)
 
@@ -15,8 +17,9 @@ and architecture-ablation studies from the original experiment are not.
 | `core.py` | Spiral geometry and sampling, conditional CFG U-MLP, linear flow path, Heun sampler, metrics, plotting helpers. |
 | `train_flow.py` | Trains the conditional flow-matching teacher (10% class dropout) and renders a target/CFG sample grid. |
 | `dmd.py` | DMD and DMD2 distillation, 8 arms = {DMD1, DMD2} × {backward simulation, BPTT} × guidance `w ∈ {2,4}`, plus evaluation and comparison figures. |
-| `run_all.sh` | Tests → teacher → all DMD arms → prints figure paths. |
-| `tests/test_pipeline.py` | 17 fast unit tests (data geometry, score identity, schedule, rollout grad masks, Heun snapshots, checkpoint checks). |
+| `interpolate.py` | Frozen clockwise class-condition sweep `g=7→0` with shared noise and rotated geometric references; no retraining. |
+| `run_all.sh` | Tests → teacher → all DMD arms → interpolation → prints figure paths. |
+| `tests/test_pipeline.py` | 19 fast unit tests (data geometry, score identity, schedule, rollout grad masks, Heun snapshots, interpolation grid, checkpoint checks). |
 | `requirements.txt` | Torch/NumPy/Matplotlib requirements. |
 | `runs/` | Generated artifacts (checkpoints, histories, metrics, figures); not required for sharing. |
 | `figures/` | Curated PNGs from the recorded run. |
@@ -41,6 +44,7 @@ cd experiments/spiral_flow_dmd
 python -m unittest discover -s tests -v
 python train_flow.py all --device cuda --run-name teacher
 python dmd.py all --device cuda --run-name dmd --teacher-run teacher
+python interpolate.py --device cuda --teacher-run teacher --scales 1 2
 ```
 
 Or in one command:
@@ -112,6 +116,13 @@ DMD (`runs/dmd/`):
   exact target, with a class-4 close-up
 - `evaluation_*/summary.json` — per-arm SW1/HDR/center error table
 
+Interpolation (`runs/teacher/interpolation_*/`):
+- `metrics.json` — per-scale rotation direction, step angles, unseen/trained
+  metrics, matched-noise displacements
+- `clockwise_all_intervals_w{1,2}.png` — full 7→0 grid, 5 panels per interval
+- `clockwise_4_to_3_w*.png` — the closest unseen interval in detail
+- `clockwise_paths_w*.png` — mean path, covariance trace, matched-noise paths
+
 Curated copies of the key figures live in `figures/`.
 
 <!-- RESULTS -->
@@ -148,15 +159,39 @@ between the conditional and guided distributions rather than copying the
 teacher's CFG bias. Probe SW1 was still improving at 20k, so the arms are
 undertrained rather than equilibrated.
 
+## Frozen clockwise class interpolation (generalization)
+
+`interpolate.py` freezes the seed-42 teacher and sweeps 29 fractional conditions
+`g = 7, 6.75, …, 0` (`c = g/7`) with **identical initial noise** in every panel.
+Decreasing `g` is clockwise. Only integer groups were trained, so interior
+conditions are unseen; the gray reference is the group-0 target rotated by
+`g·45°`, a hypothetical geometric continuation rather than supervision.
+
+| CFG | total mean rotation | clockwise steps | unseen SW1 | unseen HDR50 | min mean radius | adjacent RMS move |
+|---|---|---|---|---|---|---|
+| w=1 | **−310.3°** | **28/28** | **0.01769** | 39.3% | 0.423 | 0.121–0.169 |
+| w=2 | −311.7° | **28/28** | 0.07567 | 75.9% | 0.513 | 0.112–0.151 |
+
+Geometric expectation is −315° for the full sweep. At `w=1` the unseen
+conditions score essentially the same as the trained endpoints (unseen SW1
+0.01769 vs trained 0.01816), so the conditioning behaves as a smooth,
+near-rotation-equivariant scalar rather than eight isolated classes. `w=2`
+rotates just as smoothly but with the expected CFG expansion (larger radius and
+HDR mass). There is no periodic `0→7` wrap in the scalar encoding, so that
+interval is not evaluated.
+
 Key figures:
 
+- `figures/interpolation_all_w2.png` — every fractional condition, 7→0
+- `figures/interpolation_4to3_w1.png` — unseen g=4→3 interval in detail
+- `figures/interpolation_paths_w1.png`, `..._w2.png` — mean path, spread, matched-noise paths
 - `figures/teacher_samples.png` — target vs teacher at `w=0,1,2,4`
 - `figures/comparison_w2.png`, `figures/comparison_w4.png` — all arms vs teachers
 - `figures/trajectory_dmd2_bptt_w2.png` — teacher vs student 4-step progression
 - `figures/training_curves_dmd2_bptt_w2.png`
 
-These numbers match the original experiment's recorded table, which validates
-the extraction.
+These numbers match the original experiment's recorded table and the recorded
+clockwise behavior, which validates the extraction.
 
 
 ## Notes
@@ -168,10 +203,14 @@ the extraction.
   while the teacher ODE is deterministic (`renoise_redraw_rmse > 0`).
 - The regression pairs for DMD1 use Heun-256; the trajectory figure shows the
   cheaper Heun-40 teacher row.
+- Interpolation conditions are fractional (`c` between trained labels). The gray
+  rotated target is a geometric reference only; smooth clockwise motion is
+  evidence of continuity/direction, not exact rotational equivariance, and the
+  scalar encoding has no periodic `0→7` interval.
 
 ## Provenance
 
 Extracted from `experiments/toy_2d_diffusion` (`toy_2d_diffusion.py`,
-`depth_drop_guidance.py`, `dmd_distill.py`, and their metrics helpers), keeping
-the same model, data, schedules, and evaluation definitions while removing
-unrelated experiments and dependencies.
+`depth_drop_guidance.py`, `dmd_distill.py`, `interpolate_guidance.py`, and their
+metrics helpers), keeping the same model, data, schedules, interpolation order,
+and evaluation definitions while removing unrelated experiments and dependencies.

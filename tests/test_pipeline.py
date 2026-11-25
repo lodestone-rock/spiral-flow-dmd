@@ -20,12 +20,13 @@ from torch import nn
 HERE = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(HERE))
 
-from core import (FullCFGMLP, Geometry, encode_groups, log_density, sample_data,
-                  state_digest, standardized_coordinates)
+from core import (FullCFGMLP, Geometry, encode_groups, log_density, rotate,
+                  sample_data, state_digest, standardized_coordinates)
 from dmd import (DMD2_SCHEDULE, WEIGHT_MODES, denoise, dm_per_sample,
                  heun_snapshots, initialize_copy, renoise, rollout,
                  score_from_velocity, uniform_times, validate_schedule,
                  validate_teacher_checkpoint)
+from interpolate import clockwise_grid, reference_sweep, rotate_numpy
 
 
 class TinyVelocity(nn.Module):
@@ -211,6 +212,29 @@ class CopyAndValidationTests(unittest.TestCase):
                                         "guidance": "depth"}}}
         with self.assertRaises(ValueError):
             validate_teacher_checkpoint(bad, args, 42)
+
+
+class InterpolationTests(unittest.TestCase):
+    def test_clockwise_grid(self):
+        groups = clockwise_grid(4)
+        self.assertEqual(len(groups), 29)
+        self.assertEqual(groups[0], 7.0)
+        self.assertEqual(groups[-1], 0.0)
+        self.assertTrue(bool((np.diff(groups) < 0).all()))
+        self.assertEqual(list(clockwise_grid(1)), [7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, 0.0])
+        with self.assertRaises(ValueError):
+            clockwise_grid(0)
+
+    def test_rotation_convention_matches_core(self):
+        base = np.array([[0.5, 0.2], [-0.3, 0.7]])
+        for angle in (0.3, -1.1, np.pi / 4):
+            expected = rotate(torch.from_numpy(base),
+                              torch.full((len(base),), float(angle))).numpy()
+            np.testing.assert_allclose(rotate_numpy(base, angle), expected,
+                                       rtol=1e-6, atol=1e-6)
+        reference = reference_sweep(base, np.array([1.0, 0.0]))
+        np.testing.assert_allclose(reference[0], rotate_numpy(base, np.pi / 4))
+        np.testing.assert_allclose(reference[1], base)
 
 
 if __name__ == "__main__":
