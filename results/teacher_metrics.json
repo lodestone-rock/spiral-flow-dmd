@@ -1,0 +1,2687 @@
+{
+  "seed": 42,
+  "steps": 256,
+  "samples_per_class": 4096,
+  "scales": {
+    "0": {
+      "vs_target": {
+        "by_class": [
+          {
+            "sliced_wasserstein_1": 0.3116195326986943,
+            "mean": [
+              -0.008653372312768859,
+              -0.007078139116718063
+            ],
+            "geometric_median": [
+              -0.024576892538631028,
+              -0.0016034236765540967
+            ],
+            "mean_displacement": 0.4445766743832445,
+            "median_displacement": 0.5009751738580058,
+            "covariance": [
+              [
+                0.1569300865036331,
+                -0.003551470676018179
+              ],
+              [
+                -0.003551470676018179,
+                0.16570196996906328
+              ]
+            ],
+            "covariance_frobenius_error": 0.153720874199186,
+            "covariance_trace_ratio": 2.703632567376526,
+            "hdr_50_mass": 0.013916015625,
+            "hdr_90_mass": 0.037841796875,
+            "mean_target_log_density": -83.52835938384628,
+            "radius_99": 0.7547962295390112,
+            "group": 0,
+            "count": 4096,
+            "inverse_mean": [
+              -5.611854333246887,
+              0.8176942846804471
+            ],
+            "inverse_variances": [
+              16.7675848005683,
+              125.76183145449781
+            ],
+            "inverse_reference_mean": [
+              0.0062017050993709525,
+              0.019985025426766008
+            ],
+            "inverse_mean_norm": 5.671113911814938,
+            "inverse_mean_error": 5.674406904011899,
+            "inverse_variance_ratio": 72.52422819911355,
+            "requested_class_assignment_fraction": 0.134033203125
+          },
+          {
+            "sliced_wasserstein_1": 0.3059525311344572,
+            "mean": [
+              -0.009472666287123843,
+              -0.001767994736979972
+            ],
+            "geometric_median": [
+              -0.027056764162501804,
+              0.015008928333765601
+            ],
+            "mean_displacement": 0.42707457417742595,
+            "median_displacement": 0.47039491205006767,
+            "covariance": [
+              [
+                0.15977852536865395,
+                -0.0016826675339819532
+              ],
+              [
+                -0.0016826675339819532,
+                0.16312391084053968
+              ]
+            ],
+            "covariance_frobenius_error": 0.14865488059420134,
+            "covariance_trace_ratio": 2.58478226520903,
+            "hdr_50_mass": 0.015869140625,
+            "hdr_90_mass": 0.0439453125,
+            "mean_target_log_density": -85.19050463283226,
+            "radius_99": 0.7582020377371907,
+            "group": 1,
+            "count": 4096,
+            "inverse_mean": [
+              -5.28952221559128,
+              0.6775904398352324
+            ],
+            "inverse_variances": [
+              15.803886215921084,
+              133.77317946450873
+            ],
+            "inverse_reference_mean": [
+              0.0024485596916822214,
+              -0.0267015645419724
+            ],
+            "inverse_mean_norm": 5.332745453646722,
+            "inverse_mean_error": 5.338631089884243,
+            "inverse_variance_ratio": 74.34778668038308,
+            "requested_class_assignment_fraction": 0.134765625
+          },
+          {
+            "sliced_wasserstein_1": 0.29400785920393524,
+            "mean": [
+              -0.00771400223790053,
+              -0.008769388022969338
+            ],
+            "geometric_median": [
+              -0.020602941075738613,
+              0.0012938460480197722
+            ],
+            "mean_displacement": 0.4299962756201891,
+            "median_displacement": 0.4827445743195268,
+            "covariance": [
+              [
+                0.15675032435069783,
+                -0.00485171018737969
+              ],
+              [
+                -0.00485171018737969,
+                0.16468129577533597
+              ]
+            ],
+            "covariance_frobenius_error": 0.14762013546188185,
+            "covariance_trace_ratio": 2.682609097801933,
+            "hdr_50_mass": 0.012939453125,
+            "hdr_90_mass": 0.043212890625,
+            "mean_target_log_density": -85.56719063161053,
+            "radius_99": 0.7591598620687892,
+            "group": 2,
+            "count": 4096,
+            "inverse_mean": [
+              -5.135514829152093,
+              0.01733594939918504
+            ],
+            "inverse_variances": [
+              15.21106127631341,
+              137.18373737948002
+            ],
+            "inverse_reference_mean": [
+              0.0017715395386655463,
+              -0.004375670230601394
+            ],
+            "inverse_mean_norm": 5.13554408953741,
+            "inverse_mean_error": 5.137332248196805,
+            "inverse_variance_ratio": 76.37472447602535,
+            "requested_class_assignment_fraction": 0.128173828125
+          },
+          {
+            "sliced_wasserstein_1": 0.28313831758366714,
+            "mean": [
+              -0.007386141260639079,
+              -0.00907381707045829
+            ],
+            "geometric_median": [
+              -0.019940183663138423,
+              -0.0004462292800705334
+            ],
+            "mean_displacement": 0.423934792415261,
+            "median_displacement": 0.48928055837476037,
+            "covariance": [
+              [
+                0.15588266159078618,
+                -0.002037385843626002
+              ],
+              [
+                -0.002037385843626002,
+                0.16711971437546355
+              ]
+            ],
+            "covariance_frobenius_error": 0.14949741476584474,
+            "covariance_trace_ratio": 2.5970106771823134,
+            "hdr_50_mass": 0.019775390625,
+            "hdr_90_mass": 0.0478515625,
+            "mean_target_log_density": -82.19188767776969,
+            "radius_99": 0.7528070333379586,
+            "group": 3,
+            "count": 4096,
+            "inverse_mean": [
+              -5.196220227925968,
+              -0.6376253476766316
+            ],
+            "inverse_variances": [
+              16.46625420998124,
+              128.1444808926061
+            ],
+            "inverse_reference_mean": [
+              -0.005150076161801171,
+              -0.007909920340973757
+            ],
+            "inverse_mean_norm": 5.235195387099392,
+            "inverse_mean_error": 5.229125246153642,
+            "inverse_variance_ratio": 69.50009622344187,
+            "requested_class_assignment_fraction": 0.14501953125
+          },
+          {
+            "sliced_wasserstein_1": 0.30641783563552605,
+            "mean": [
+              -0.008569806763553345,
+              -0.010696741387096864
+            ],
+            "geometric_median": [
+              -0.024073670490735777,
+              -0.0060086817301528905
+            ],
+            "mean_displacement": 0.4338839205364001,
+            "median_displacement": 0.5067170217035827,
+            "covariance": [
+              [
+                0.1571619892495378,
+                -0.002053934100866289
+              ],
+              [
+                -0.002053934100866289,
+                0.1641729558199499
+              ]
+            ],
+            "covariance_frobenius_error": 0.15148711992045402,
+            "covariance_trace_ratio": 2.6702148100097305,
+            "hdr_50_mass": 0.0185546875,
+            "hdr_90_mass": 0.041259765625,
+            "mean_target_log_density": -82.67776276000478,
+            "radius_99": 0.7655144992070224,
+            "group": 4,
+            "count": 4096,
+            "inverse_mean": [
+              -5.388517049738925,
+              -0.8988735521666956
+            ],
+            "inverse_variances": [
+              16.52157977455491,
+              126.62408657549787
+            ],
+            "inverse_reference_mean": [
+              0.0034406905544553585,
+              -0.014066106014153411
+            ],
+            "inverse_mean_norm": 5.462974433228831,
+            "inverse_mean_error": 5.46407288475151,
+            "inverse_variance_ratio": 71.79835237068492,
+            "requested_class_assignment_fraction": 0.1279296875
+          },
+          {
+            "sliced_wasserstein_1": 0.31650042630090486,
+            "mean": [
+              -0.006226241695145518,
+              -0.017780531716546477
+            ],
+            "geometric_median": [
+              -0.01961859842336812,
+              -0.019590394327208025
+            ],
+            "mean_displacement": 0.4365166575615522,
+            "median_displacement": 0.5094284320666185,
+            "covariance": [
+              [
+                0.15799936689021238,
+                0.0016787637006531635
+              ],
+              [
+                0.0016787637006531635,
+                0.16606690675631222
+              ]
+            ],
+            "covariance_frobenius_error": 0.1487759912411059,
+            "covariance_trace_ratio": 2.632160799908247,
+            "hdr_50_mass": 0.01220703125,
+            "hdr_90_mass": 0.031982421875,
+            "mean_target_log_density": -88.62063494550175,
+            "radius_99": 0.7593568266016394,
+            "group": 5,
+            "count": 4096,
+            "inverse_mean": [
+              -5.677318127358968,
+              -1.043332576612351
+            ],
+            "inverse_variances": [
+              15.617012070616047,
+              135.938004323883
+            ],
+            "inverse_reference_mean": [
+              0.0014381661139366707,
+              -0.0300932716300816
+            ],
+            "inverse_mean_norm": 5.772389798398867,
+            "inverse_mean_error": 5.768442331324731,
+            "inverse_variance_ratio": 74.46867954050893,
+            "requested_class_assignment_fraction": 0.10986328125
+          },
+          {
+            "sliced_wasserstein_1": 0.3075446810322965,
+            "mean": [
+              -0.010525932824634765,
+              -0.0013014472986156989
+            ],
+            "geometric_median": [
+              -0.028360999941817518,
+              0.018290311440663457
+            ],
+            "mean_displacement": 0.4506120852848871,
+            "median_displacement": 0.5281033297982798,
+            "covariance": [
+              [
+                0.15351189826736525,
+                -0.005078569485884077
+              ],
+              [
+                -0.005078569485884077,
+                0.16695284143336228
+              ]
+            ],
+            "covariance_frobenius_error": 0.14440780479336068,
+            "covariance_trace_ratio": 2.6250026259887456,
+            "hdr_50_mass": 0.015869140625,
+            "hdr_90_mass": 0.033203125,
+            "mean_target_log_density": -88.9813456940405,
+            "radius_99": 0.7531028810270503,
+            "group": 6,
+            "count": 4096,
+            "inverse_mean": [
+              -5.903923963777664,
+              -0.04029311933367682
+            ],
+            "inverse_variances": [
+              15.294610261036135,
+              135.44436990966622
+            ],
+            "inverse_reference_mean": [
+              0.01984290569998122,
+              -0.018483662546146154
+            ],
+            "inverse_mean_norm": 5.904061458482102,
+            "inverse_mean_error": 5.92380701714078,
+            "inverse_variance_ratio": 73.8596366979856,
+            "requested_class_assignment_fraction": 0.1005859375
+          },
+          {
+            "sliced_wasserstein_1": 0.3034906719795814,
+            "mean": [
+              -0.004023886671831178,
+              -0.013644622718306465
+            ],
+            "geometric_median": [
+              -0.01573403130130654,
+              -0.0066902370031418435
+            ],
+            "mean_displacement": 0.4535561271905211,
+            "median_displacement": 0.5164551186137356,
+            "covariance": [
+              [
+                0.15951859954643735,
+                -0.005765307147991928
+              ],
+              [
+                -0.005765307147991928,
+                0.16325769765429393
+              ]
+            ],
+            "covariance_frobenius_error": 0.14915630394921034,
+            "covariance_trace_ratio": 2.6629150838976705,
+            "hdr_50_mass": 0.011474609375,
+            "hdr_90_mass": 0.03076171875,
+            "mean_target_log_density": -86.6599755160135,
+            "radius_99": 0.7665073514220824,
+            "group": 7,
+            "count": 4096,
+            "inverse_mean": [
+              -5.829727473593902,
+              0.48258472294058485
+            ],
+            "inverse_variances": [
+              16.156841739478736,
+              130.57872934951158
+            ],
+            "inverse_reference_mean": [
+              0.004477570449572661,
+              -0.0013490603741789405
+            ],
+            "inverse_mean_norm": 5.849667548774988,
+            "inverse_mean_error": 5.854241232010828,
+            "inverse_variance_ratio": 73.47336929321321,
+            "requested_class_assignment_fraction": 0.108154296875
+          }
+        ],
+        "average": {
+          "sliced_wasserstein_1": 0.30358398194613284,
+          "hdr_50_mass": 0.01507568359375,
+          "hdr_90_mass": 0.03875732421875,
+          "mean_displacement": 0.43751888839618513,
+          "median_displacement": 0.5005123900980721,
+          "covariance_trace_ratio": 2.6447909909217744,
+          "inverse_mean_error": 5.548757369184305,
+          "inverse_mean_norm": 5.545461510122906,
+          "inverse_variance_ratio": 73.29335918516956,
+          "requested_class_assignment_fraction": 0.123565673828125
+        }
+      },
+      "mixture": {
+        "sw1": 0.01471721617379922,
+        "hdr50_mass": 0.133880615234375,
+        "hdr90_mass": 0.315582275390625,
+        "mean_log_target_density": -5.212160949637035,
+        "mean": [
+          -0.00782150625669964,
+          -0.008764085258461396
+        ],
+        "global_covariance_trace": 0.3222880962746627,
+        "radius_quantiles_50_90_99": [
+          0.5622055825859462,
+          0.6697338307936161,
+          0.7580734883083761
+        ],
+        "outside_plot_fraction": 0.0,
+        "max_group_fraction_error": 0.021270751953125,
+        "valid_local_groups": 8,
+        "local_averages": {
+          "covariance_trace_ratio": 0.8838989824795942,
+          "mean_error": 0.04015153202347176,
+          "median_error": 0.05713367624179081,
+          "inverse_gaussian_mean_error": 0.18349082528605903,
+          "inverse_gaussian_variance_ratio": 6.895958721149958
+        },
+        "groups": [
+          {
+            "group": 0,
+            "count": 4447,
+            "fraction": 0.135711669921875,
+            "inverse_gaussian_reference_mean": [
+              0.0062017050993709525,
+              0.019985025426766008
+            ],
+            "inverse_gaussian_mean_error": 0.13409580993629838,
+            "inverse_gaussian_variance_ratio": 6.9594839420357015,
+            "mean": [
+              -0.18220900193228312,
+              0.421282383794757
+            ],
+            "median": [
+              -0.15898775649270694,
+              0.4866207056746773
+            ],
+            "covariance_trace": 0.10584393883099531,
+            "covariance_trace_ratio": 0.8869643122617147,
+            "mean_error": 0.01776117120353999,
+            "median_error": 0.029110842658219345,
+            "inverse_gaussian_mean": [
+              -0.08636594901182547,
+              0.11700520711501972
+            ],
+            "inverse_gaussian_variances": [
+              0.7582200061536499,
+              12.919018736346738
+            ]
+          },
+          {
+            "group": 1,
+            "count": 4221,
+            "fraction": 0.128814697265625,
+            "inverse_gaussian_reference_mean": [
+              0.0024485596916822214,
+              -0.0267015645419724
+            ],
+            "inverse_gaussian_mean_error": 0.23069142590178424,
+            "inverse_gaussian_variance_ratio": 6.692756572475968,
+            "mean": [
+              -0.383982438995351,
+              0.19480672852671096
+            ],
+            "median": [
+              -0.39703591279972295,
+              0.28236986213197124
+            ],
+            "covariance_trace": 0.11687150303256846,
+            "covariance_trace_ratio": 0.9355376561829277,
+            "mean_error": 0.04129806239402546,
+            "median_error": 0.049922444827475265,
+            "inverse_gaussian_mean": [
+              -0.22439969223591327,
+              -0.06863489951538668
+            ],
+            "inverse_gaussian_variances": [
+              0.8451468376594298,
+              12.619717876174821
+            ]
+          },
+          {
+            "group": 2,
+            "count": 4394,
+            "fraction": 0.13409423828125,
+            "inverse_gaussian_reference_mean": [
+              0.0017715395386655463,
+              -0.004375670230601394
+            ],
+            "inverse_gaussian_mean_error": 0.203486796132011,
+            "inverse_gaussian_variance_ratio": 6.894384649807847,
+            "mean": [
+              -0.3963038290900203,
+              -0.1954099386158492
+            ],
+            "median": [
+              -0.47238216809382366,
+              -0.16776510174106074
+            ],
+            "covariance_trace": 0.12562287296363345,
+            "covariance_trace_ratio": 1.048425359558971,
+            "mean_error": 0.023200101708006616,
+            "median_error": 0.04160543283025295,
+            "inverse_gaussian_mean": [
+              -0.05573402825771227,
+              0.1908165065401053
+            ],
+            "inverse_gaussian_variances": [
+              0.8591572189524079,
+              12.897597620704959
+            ]
+          },
+          {
+            "group": 3,
+            "count": 4793,
+            "fraction": 0.146270751953125,
+            "inverse_gaussian_reference_mean": [
+              -0.005150076161801171,
+              -0.007909920340973757
+            ],
+            "inverse_gaussian_mean_error": 0.11773855336024233,
+            "inverse_gaussian_variance_ratio": 6.672795994954544,
+            "mean": [
+              -0.1516134378190615,
+              -0.4381085475314877
+            ],
+            "median": [
+              -0.21248147637187512,
+              -0.47290725931698074
+            ],
+            "covariance_trace": 0.10859621470912434,
+            "covariance_trace_ratio": 0.8731376302032142,
+            "mean_error": 0.034689767844179056,
+            "median_error": 0.058179612814384954,
+            "inverse_gaussian_mean": [
+              -0.019451784484827046,
+              0.10895679042991138
+            ],
+            "inverse_gaussian_variances": [
+              0.6965723543532262,
+              13.187695243171397
+            ]
+          },
+          {
+            "group": 4,
+            "count": 4174,
+            "fraction": 0.12738037109375,
+            "inverse_gaussian_reference_mean": [
+              0.0034406905544553585,
+              -0.014066106014153411
+            ],
+            "inverse_gaussian_mean_error": 0.2928173573623518,
+            "inverse_gaussian_variance_ratio": 7.204076246834088,
+            "mean": [
+              0.22176403445868778,
+              -0.4258854973917447
+            ],
+            "median": [
+              0.19623224533946218,
+              -0.49129915523799506
+            ],
+            "covariance_trace": 0.10378024915426692,
+            "covariance_trace_ratio": 0.8623884906706862,
+            "mean_error": 0.052658932159035034,
+            "median_error": 0.06378975912941981,
+            "inverse_gaussian_mean": [
+              0.0795032664170683,
+              -0.2968318912955688
+            ],
+            "inverse_gaussian_variances": [
+              0.6042257243847466,
+              13.758670647742898
+            ]
+          },
+          {
+            "group": 5,
+            "count": 3639,
+            "fraction": 0.111053466796875,
+            "inverse_gaussian_reference_mean": [
+              0.0014381661139366707,
+              -0.0300932716300816
+            ],
+            "inverse_gaussian_mean_error": 0.08836653873619654,
+            "inverse_gaussian_variance_ratio": 6.8395492027149,
+            "mean": [
+              0.472487001286892,
+              -0.14052293395132376
+            ],
+            "median": [
+              0.5045827835360323,
+              -0.18078748407161366
+            ],
+            "covariance_trace": 0.09095135055532572,
+            "covariance_trace_ratio": 0.7387333983775356,
+            "mean_error": 0.06972265915449605,
+            "median_error": 0.10216396786424231,
+            "inverse_gaussian_mean": [
+              0.08560031806528232,
+              -0.003160441345569518
+            ],
+            "inverse_gaussian_variances": [
+              0.5557012260752212,
+              13.36381497784209
+            ]
+          },
+          {
+            "group": 6,
+            "count": 3423,
+            "fraction": 0.104461669921875,
+            "inverse_gaussian_reference_mean": [
+              0.01984290569998122,
+              -0.018483662546146154
+            ],
+            "inverse_gaussian_mean_error": 0.12444173127635082,
+            "inverse_gaussian_variance_ratio": 6.7142537293541515,
+            "mean": [
+              0.44130108849699967,
+              0.19059360897650401
+            ],
+            "median": [
+              0.4949374892198257,
+              0.18595105245438248
+            ],
+            "covariance_trace": 0.09024994205036822,
+            "covariance_trace_ratio": 0.7392586625873052,
+            "mean_error": 0.0405852009889061,
+            "median_error": 0.046545587887872865,
+            "inverse_gaussian_mean": [
+              -0.0283159526278941,
+              -0.13322889707730715
+            ],
+            "inverse_gaussian_variances": [
+              0.5806210566371388,
+              13.122394623072848
+            ]
+          },
+          {
+            "group": 7,
+            "count": 3677,
+            "fraction": 0.112213134765625,
+            "inverse_gaussian_reference_mean": [
+              0.004477570449572661,
+              -0.0013490603741789405
+            ],
+            "inverse_gaussian_mean_error": 0.276288389583237,
+            "inverse_gaussian_variance_ratio": 7.190369431022461,
+            "mean": [
+              0.13250571624210614,
+              0.4384523062921141
+            ],
+            "median": [
+              0.20423747428815098,
+              0.4785305379438881
+            ],
+            "covariance_trace": 0.1196051406420919,
+            "covariance_trace_ratio": 0.9867463499943987,
+            "mean_error": 0.041296360735585805,
+            "median_error": 0.06575176192245902,
+            "inverse_gaussian_mean": [
+              0.023514481698761195,
+              0.27428270526358106
+            ],
+            "inverse_gaussian_variances": [
+              0.7516149495208306,
+              13.608458298125344
+            ]
+          }
+        ]
+      }
+    },
+    "1": {
+      "vs_target": {
+        "by_class": [
+          {
+            "sliced_wasserstein_1": 0.02056835960253624,
+            "mean": [
+              -0.18262580206238255,
+              0.39089358640615046
+            ],
+            "geometric_median": [
+              -0.1553525307592517,
+              0.48386312314695024
+            ],
+            "mean_displacement": 0.01750423101530641,
+            "median_displacement": 0.02579658562817641,
+            "covariance": [
+              [
+                0.0962999984647631,
+                0.023535267641416537
+              ],
+              [
+                0.023535267641416537,
+                0.043983707165396894
+              ]
+            ],
+            "covariance_frobenius_error": 0.015341910445583654,
+            "covariance_trace_ratio": 1.175566989097562,
+            "hdr_50_mass": 0.313232421875,
+            "hdr_90_mass": 0.63720703125,
+            "mean_target_log_density": 0.3668098654475289,
+            "radius_99": 0.8018199311984251,
+            "group": 0,
+            "count": 4096,
+            "inverse_mean": [
+              0.06117114676955249,
+              -0.4463389045991071
+            ],
+            "inverse_variances": [
+              0.9896896382316436,
+              5.707960792072341
+            ],
+            "inverse_reference_mean": [
+              0.0062017050993709525,
+              0.019985025426766008
+            ],
+            "inverse_mean_norm": 0.4505111840518867,
+            "inverse_mean_error": 0.4695526032643274,
+            "inverse_variance_ratio": 3.40801177025793,
+            "requested_class_assignment_fraction": 0.97998046875
+          },
+          {
+            "sliced_wasserstein_1": 0.019686877526244966,
+            "mean": [
+              -0.41231229167520667,
+              0.1445706968227043
+            ],
+            "geometric_median": [
+              -0.4595892869589343,
+              0.2348768470584869
+            ],
+            "mean_displacement": 0.01640778107472876,
+            "median_displacement": 0.02890660978219379,
+            "covariance": [
+              [
+                0.045440043127557526,
+                0.0239087142652973
+              ],
+              [
+                0.0239087142652973,
+                0.09480774631584256
+              ]
+            ],
+            "covariance_frobenius_error": 0.012652077064785897,
+            "covariance_trace_ratio": 1.1226610834649051,
+            "hdr_50_mass": 0.299560546875,
+            "hdr_90_mass": 0.615478515625,
+            "mean_target_log_density": 0.2607938602441108,
+            "radius_99": 0.8050492375154589,
+            "group": 1,
+            "count": 4096,
+            "inverse_mean": [
+              0.10526606685095811,
+              -0.8373967507506697
+            ],
+            "inverse_variances": [
+              0.9374541468039383,
+              5.462874357864657
+            ],
+            "inverse_reference_mean": [
+              0.0024485596916822214,
+              -0.0267015645419724
+            ],
+            "inverse_mean_norm": 0.8439871225309362,
+            "inverse_mean_error": 0.817189160917105,
+            "inverse_variance_ratio": 3.181304942604812,
+            "requested_class_assignment_fraction": 0.98291015625
+          },
+          {
+            "sliced_wasserstein_1": 0.012315567420489235,
+            "mean": [
+              -0.3998878613747934,
+              -0.1833995546540521
+            ],
+            "geometric_median": [
+              -0.4872751844274908,
+              -0.13608072460656653
+            ],
+            "mean_displacement": 0.010761602154455794,
+            "median_displacement": 0.007932828111136145,
+            "covariance": [
+              [
+                0.041555101098985754,
+                -0.025557140528657124
+              ],
+              [
+                -0.025557140528657124,
+                0.09009323446389038
+              ]
+            ],
+            "covariance_frobenius_error": 0.012054330015695022,
+            "covariance_trace_ratio": 1.0987127605957945,
+            "hdr_50_mass": 0.38232421875,
+            "hdr_90_mass": 0.729736328125,
+            "mean_target_log_density": 1.0127996159132007,
+            "radius_99": 0.8070508646555478,
+            "group": 2,
+            "count": 4096,
+            "inverse_mean": [
+              0.0728581727239081,
+              -0.4343065755585507
+            ],
+            "inverse_variances": [
+              0.8809504774970274,
+              4.533750263925353
+            ],
+            "inverse_reference_mean": [
+              0.0017715395386655463,
+              -0.004375670230601394
+            ],
+            "inverse_mean_norm": 0.44037542495700405,
+            "inverse_mean_error": 0.435768164020415,
+            "inverse_variance_ratio": 2.713650865344302,
+            "requested_class_assignment_fraction": 0.991455078125
+          },
+          {
+            "sliced_wasserstein_1": 0.008209845872709795,
+            "mean": [
+              -0.16607182921728736,
+              -0.4009426185850202
+            ],
+            "geometric_median": [
+              -0.26001990050868484,
+              -0.4318633277431138
+            ],
+            "mean_displacement": 0.006852902724546233,
+            "median_displacement": 0.00742576821586577,
+            "covariance": [
+              [
+                0.08816224486670537,
+                -0.025134951454508194
+              ],
+              [
+                -0.025134951454508194,
+                0.04289527464363404
+              ]
+            ],
+            "covariance_frobenius_error": 0.005385087102386631,
+            "covariance_trace_ratio": 1.0537314980275705,
+            "hdr_50_mass": 0.397216796875,
+            "hdr_90_mass": 0.722412109375,
+            "mean_target_log_density": 1.2711331330115947,
+            "radius_99": 0.7973806480462886,
+            "group": 3,
+            "count": 4096,
+            "inverse_mean": [
+              0.022964598129759786,
+              -0.5130296496571324
+            ],
+            "inverse_variances": [
+              0.9221604910936785,
+              3.9060769368434007
+            ],
+            "inverse_reference_mean": [
+              -0.005150076161801171,
+              -0.007909920340973757
+            ],
+            "inverse_mean_norm": 0.5135433712887173,
+            "inverse_mean_error": 0.5059015475909813,
+            "inverse_variance_ratio": 2.3204568152786234,
+            "requested_class_assignment_fraction": 0.9951171875
+          },
+          {
+            "sliced_wasserstein_1": 0.012814922093208048,
+            "mean": [
+              0.15709411815740282,
+              -0.39895023970666443
+            ],
+            "geometric_median": [
+              0.10579611014183368,
+              -0.48107305279667445
+            ],
+            "mean_displacement": 0.017459366795973458,
+            "median_displacement": 0.027598395212841433,
+            "covariance": [
+              [
+                0.091019147285904,
+                0.019012455781357455
+              ],
+              [
+                0.019012455781357455,
+                0.03306836615931851
+              ]
+            ],
+            "covariance_frobenius_error": 0.005124014082044013,
+            "covariance_trace_ratio": 1.0311368907202527,
+            "hdr_50_mass": 0.42138671875,
+            "hdr_90_mass": 0.806640625,
+            "mean_target_log_density": 1.9584965270249177,
+            "radius_99": 0.7858731315833566,
+            "group": 4,
+            "count": 4096,
+            "inverse_mean": [
+              -0.07034936845887263,
+              0.052215430131751395
+            ],
+            "inverse_variances": [
+              0.9730440190630794,
+              2.7365179302555274
+            ],
+            "inverse_reference_mean": [
+              0.0034406905544553585,
+              -0.014066106014153411
+            ],
+            "inverse_mean_norm": 0.08760984411814711,
+            "inverse_mean_error": 0.09918777567347356,
+            "inverse_variance_ratio": 1.8606252132477776,
+            "requested_class_assignment_fraction": 0.99609375
+          },
+          {
+            "sliced_wasserstein_1": 0.017319125062912624,
+            "mean": [
+              0.3891054368320823,
+              -0.17745766545498043
+            ],
+            "geometric_median": [
+              0.41642337059473766,
+              -0.26012732700758373
+            ],
+            "mean_displacement": 0.023264810906670905,
+            "median_displacement": 0.017725798003403653,
+            "covariance": [
+              [
+                0.04575305884031426,
+                0.029431869380649
+              ],
+              [
+                0.029431869380649,
+                0.07256828265174273
+              ]
+            ],
+            "covariance_frobenius_error": 0.013046809372440803,
+            "covariance_trace_ratio": 0.9610404481882423,
+            "hdr_50_mass": 0.424072265625,
+            "hdr_90_mass": 0.817626953125,
+            "mean_target_log_density": 2.2243052618432353,
+            "radius_99": 0.7721000541474329,
+            "group": 5,
+            "count": 4096,
+            "inverse_mean": [
+              -0.13488020893375077,
+              0.12751885400825091
+            ],
+            "inverse_variances": [
+              1.07823429948036,
+              2.0729319360984357
+            ],
+            "inverse_reference_mean": [
+              0.0014381661139366707,
+              -0.0300932716300816
+            ],
+            "inverse_mean_norm": 0.18561715677595614,
+            "inverse_mean_error": 0.20838493593317992,
+            "inverse_variance_ratio": 1.5483696558440456,
+            "requested_class_assignment_fraction": 0.99951171875
+          },
+          {
+            "sliced_wasserstein_1": 0.02093630610016112,
+            "mean": [
+              0.4071115587127139,
+              0.14852930675300513
+            ],
+            "geometric_median": [
+              0.4844960004984166,
+              0.10805755254533278
+            ],
+            "mean_displacement": 0.031086645967348787,
+            "median_displacement": 0.03234195000961348,
+            "covariance": [
+              [
+                0.030041475164294132,
+                -0.013533451791345841
+              ],
+              [
+                -0.013533451791345841,
+                0.08491524011552175
+              ]
+            ],
+            "covariance_frobenius_error": 0.011301246068979134,
+            "covariance_trace_ratio": 0.9416376970719571,
+            "hdr_50_mass": 0.472412109375,
+            "hdr_90_mass": 0.82861328125,
+            "mean_target_log_density": 2.214004566747712,
+            "radius_99": 0.7653907919631121,
+            "group": 6,
+            "count": 4096,
+            "inverse_mean": [
+              -0.12061413219365136,
+              -0.00349777292543505
+            ],
+            "inverse_variances": [
+              1.0759775028379273,
+              2.1156838485212326
+            ],
+            "inverse_reference_mean": [
+              0.01984290569998122,
+              -0.018483662546146154
+            ],
+            "inverse_mean_norm": 0.12066483870732812,
+            "inverse_mean_error": 0.14125422606625784,
+            "inverse_variance_ratio": 1.5638618996057583,
+            "requested_class_assignment_fraction": 0.99755859375
+          },
+          {
+            "sliced_wasserstein_1": 0.01824003489788601,
+            "mean": [
+              0.17984951939763505,
+              0.3926597510609042
+            ],
+            "geometric_median": [
+              0.27299070184142715,
+              0.4143542826864386
+            ],
+            "mean_displacement": 0.02463413018883412,
+            "median_displacement": 0.028322464298222418,
+            "covariance": [
+              [
+                0.08024575668153014,
+                -0.028653485217759324
+              ],
+              [
+                -0.028653485217759324,
+                0.04462788815248367
+              ]
+            ],
+            "covariance_frobenius_error": 0.004924994447737671,
+            "covariance_trace_ratio": 1.0302116831180452,
+            "hdr_50_mass": 0.41552734375,
+            "hdr_90_mass": 0.791015625,
+            "mean_target_log_density": 1.5433381008674094,
+            "radius_99": 0.7892005501582215,
+            "group": 7,
+            "count": 4096,
+            "inverse_mean": [
+              -0.05426275288814724,
+              -0.6953196191094998
+            ],
+            "inverse_variances": [
+              1.053332020223584,
+              3.007808447126857
+            ],
+            "inverse_reference_mean": [
+              0.004477570449572661,
+              -0.0013490603741789405
+            ],
+            "inverse_mean_norm": 0.6974337381211064,
+            "inverse_mean_error": 0.6964521246842695,
+            "inverse_variance_ratio": 2.0334924319631424,
+            "requested_class_assignment_fraction": 0.993408203125
+          }
+        ],
+        "average": {
+          "sliced_wasserstein_1": 0.016261379822018505,
+          "hdr_50_mass": 0.390716552734375,
+          "hdr_90_mass": 0.74359130859375,
+          "mean_displacement": 0.018496433853483058,
+          "median_displacement": 0.022006299907681638,
+          "covariance_trace_ratio": 1.051837381285541,
+          "inverse_mean_error": 0.42171131726875116,
+          "inverse_mean_norm": 0.4174678350688853,
+          "inverse_variance_ratio": 2.328721699268299,
+          "requested_class_assignment_fraction": 0.99200439453125
+        }
+      },
+      "mixture": {
+        "sw1": 0.009775114129094261,
+        "hdr50_mass": 0.392242431640625,
+        "hdr90_mass": 0.74493408203125,
+        "mean_log_target_density": -0.424815381742451,
+        "mean": [
+          -0.003467143903729486,
+          -0.010512092169744136
+        ],
+        "global_covariance_trace": 0.31553976137344214,
+        "radius_quantiles_50_90_99": [
+          0.5514047409440768,
+          0.681590009857189,
+          0.7913011487832338
+        ],
+        "outside_plot_fraction": 0.0,
+        "max_group_fraction_error": 0.001129150390625,
+        "valid_local_groups": 8,
+        "local_averages": {
+          "covariance_trace_ratio": 1.0488135186560121,
+          "mean_error": 0.018802753719498792,
+          "median_error": 0.022976098806936338,
+          "inverse_gaussian_mean_error": 0.3927410281728056,
+          "inverse_gaussian_variance_ratio": 2.0487099072292523
+        },
+        "groups": [
+          {
+            "group": 0,
+            "count": 4076,
+            "fraction": 0.1243896484375,
+            "inverse_gaussian_reference_mean": [
+              0.0062017050993709525,
+              0.019985025426766008
+            ],
+            "inverse_gaussian_mean_error": 0.4040554865686659,
+            "inverse_gaussian_variance_ratio": 2.8711673302885,
+            "mean": [
+              -0.18654035092654353,
+              0.3899656425259223
+            ],
+            "median": [
+              -0.1582513088978851,
+              0.48390154793312146
+            ],
+            "covariance_trace": 0.1411300945133231,
+            "covariance_trace_ratio": 1.182659664804382,
+            "mean_error": 0.020540431222859305,
+            "median_error": 0.028652990364679175,
+            "inverse_gaussian_mean": [
+              0.09189445038922164,
+              -0.3748789886729366
+            ],
+            "inverse_gaussian_variances": [
+              0.9331954188923517,
+              4.709412764859936
+            ]
+          },
+          {
+            "group": 1,
+            "count": 4075,
+            "fraction": 0.124359130859375,
+            "inverse_gaussian_reference_mean": [
+              0.0024485596916822214,
+              -0.0267015645419724
+            ],
+            "inverse_gaussian_mean_error": 0.7484863715645579,
+            "inverse_gaussian_variance_ratio": 2.620287768712678,
+            "mean": [
+              -0.4143469253440525,
+              0.14556784965874245
+            ],
+            "median": [
+              -0.46054078356169725,
+              0.2348069066138521
+            ],
+            "covariance_trace": 0.13833077890581036,
+            "covariance_trace_ratio": 1.1073157212621543,
+            "mean_error": 0.016574065069496893,
+            "median_error": 0.029763134063740614,
+            "inverse_gaussian_mean": [
+              0.12130949089875172,
+              -0.7656900133356364
+            ],
+            "inverse_gaussian_variances": [
+              0.912026695203876,
+              4.359615853716502
+            ]
+          },
+          {
+            "group": 2,
+            "count": 4084,
+            "fraction": 0.1246337890625,
+            "inverse_gaussian_reference_mean": [
+              0.0017715395386655463,
+              -0.004375670230601394
+            ],
+            "inverse_gaussian_mean_error": 0.414296524029336,
+            "inverse_gaussian_variance_ratio": 2.269896180875023,
+            "mean": [
+              -0.40255078725202326,
+              -0.18337563274710136
+            ],
+            "median": [
+              -0.48799137851259944,
+              -0.13668084462439548
+            ],
+            "covariance_trace": 0.12869410058588032,
+            "covariance_trace_ratio": 1.0740572596117088,
+            "mean_error": 0.009819096256894939,
+            "median_error": 0.008688153688044337,
+            "inverse_gaussian_mean": [
+              0.07656913854000784,
+              -0.41186423326817245
+            ],
+            "inverse_gaussian_variances": [
+              0.8659807630794506,
+              3.663271209051602
+            ]
+          },
+          {
+            "group": 3,
+            "count": 4095,
+            "fraction": 0.124969482421875,
+            "inverse_gaussian_reference_mean": [
+              -0.005150076161801171,
+              -0.007909920340973757
+            ],
+            "inverse_gaussian_mean_error": 0.5402839823874643,
+            "inverse_gaussian_variance_ratio": 2.0660881986311077,
+            "mean": [
+              -0.1659188232753626,
+              -0.4014794459601157
+            ],
+            "median": [
+              -0.2599599064268408,
+              -0.43203649473352346
+            ],
+            "covariance_trace": 0.1307258752539203,
+            "covariance_trace_ratio": 1.0510650047165844,
+            "mean_error": 0.006454454700408446,
+            "median_error": 0.007392525247917429,
+            "inverse_gaussian_mean": [
+              0.028861368828157357,
+              -0.5471223119216503
+            ],
+            "inverse_gaussian_variances": [
+              0.9222489022185,
+              3.376716846408035
+            ]
+          },
+          {
+            "group": 4,
+            "count": 4093,
+            "fraction": 0.124908447265625,
+            "inverse_gaussian_reference_mean": [
+              0.0034406905544553585,
+              -0.014066106014153411
+            ],
+            "inverse_gaussian_mean_error": 0.08293082150187789,
+            "inverse_gaussian_variance_ratio": 1.7238630538725828,
+            "mean": [
+              0.15754743425563844,
+              -0.4004262057979469
+            ],
+            "median": [
+              0.1059909071378787,
+              -0.4814585062461166
+            ],
+            "covariance_trace": 0.1225872325091311,
+            "covariance_trace_ratio": 1.0186699230399705,
+            "mean_error": 0.016611391566605783,
+            "median_error": 0.027316017067392555,
+            "inverse_gaussian_mean": [
+              -0.06869425040121169,
+              0.02684931220806157
+            ],
+            "inverse_gaussian_variances": [
+              0.9706802611894645,
+              2.4662165114387147
+            ]
+          },
+          {
+            "group": 5,
+            "count": 4107,
+            "fraction": 0.125335693359375,
+            "inverse_gaussian_reference_mean": [
+              0.0014381661139366707,
+              -0.0300932716300816
+            ],
+            "inverse_gaussian_mean_error": 0.18990427489809833,
+            "inverse_gaussian_variance_ratio": 1.5539532004108887,
+            "mean": [
+              0.38864292112357507,
+              -0.17599944262903391
+            ],
+            "median": [
+              0.4166794889882556,
+              -0.2594660889414202
+            ],
+            "covariance_trace": 0.11987952480824676,
+            "covariance_trace_ratio": 0.9736964675814216,
+            "mean_error": 0.022637842120658048,
+            "median_error": 0.0172512707320955,
+            "inverse_gaussian_mean": [
+              -0.12967870431845646,
+              0.10728212614036173
+            ],
+            "inverse_gaussian_variances": [
+              1.0914807209308446,
+              2.071048871613439
+            ]
+          },
+          {
+            "group": 6,
+            "count": 4105,
+            "fraction": 0.125274658203125,
+            "inverse_gaussian_reference_mean": [
+              0.01984290569998122,
+              -0.018483662546146154
+            ],
+            "inverse_gaussian_mean_error": 0.13070328256383348,
+            "inverse_gaussian_variance_ratio": 1.5003963017600375,
+            "mean": [
+              0.4050426094604619,
+              0.1502785263416878
+            ],
+            "median": [
+              0.4840787426730829,
+              0.108883185481907
+            ],
+            "covariance_trace": 0.1170838081082328,
+            "covariance_trace_ratio": 0.9590612185037708,
+            "mean_error": 0.02909449078171263,
+            "median_error": 0.031531857112123036,
+            "inverse_gaussian_mean": [
+              -0.10857907849864504,
+              0.005829750366258421
+            ],
+            "inverse_gaussian_variances": [
+              1.056761685883446,
+              2.0053737170296557
+            ]
+          },
+          {
+            "group": 7,
+            "count": 4133,
+            "fraction": 0.126129150390625,
+            "inverse_gaussian_reference_mean": [
+              0.004477570449572661,
+              -0.0013490603741789405
+            ],
+            "inverse_gaussian_mean_error": 0.6312674818686107,
+            "inverse_gaussian_variance_ratio": 1.7840272232831988,
+            "mean": [
+              0.18266338709606178,
+              0.38971595775669865
+            ],
+            "median": [
+              0.2756756310015101,
+              0.410147084921416
+            ],
+            "covariance_trace": 0.12411864258907163,
+            "covariance_trace_ratio": 1.0239828897281056,
+            "mean_error": 0.028690258037354307,
+            "median_error": 0.033212842179498034,
+            "inverse_gaussian_mean": [
+              -0.06725059063223328,
+              -0.6285282250253648
+            ],
+            "inverse_gaussian_variances": [
+              1.064029750478599,
+              2.498897279614012
+            ]
+          }
+        ]
+      }
+    },
+    "2": {
+      "vs_target": {
+        "by_class": [
+          {
+            "sliced_wasserstein_1": 0.07563714849062622,
+            "mean": [
+              -0.22343941658242983,
+              0.47859083161444005
+            ],
+            "geometric_median": [
+              -0.197881671706964,
+              0.5180491502998618
+            ],
+            "mean_displacement": 0.08827480309482175,
+            "median_displacement": 0.07424089828400927,
+            "covariance": [
+              [
+                0.046612464988969315,
+                0.014210655634277198
+              ],
+              [
+                0.014210655634277198,
+                0.009378414193262364
+              ]
+            ],
+            "covariance_frobenius_error": 0.046754816075991454,
+            "covariance_trace_ratio": 0.46919939105907404,
+            "hdr_50_mass": 0.7255859375,
+            "hdr_90_mass": 0.95361328125,
+            "mean_target_log_density": 3.0854918087460725,
+            "radius_99": 0.739200475398616,
+            "group": 0,
+            "count": 4096,
+            "inverse_mean": [
+              0.24825704266770068,
+              -0.6076872004915449
+            ],
+            "inverse_variances": [
+              0.32022763302602325,
+              0.7121039447613173
+            ],
+            "inverse_reference_mean": [
+              0.0062017050993709525,
+              0.019985025426766008
+            ],
+            "inverse_mean_norm": 0.6564413857119031,
+            "inverse_mean_error": 0.6727281840643852,
+            "inverse_variance_ratio": 0.5252884133799913,
+            "requested_class_assignment_fraction": 0.999755859375
+          },
+          {
+            "sliced_wasserstein_1": 0.09404685557978554,
+            "mean": [
+              -0.5188662007831226,
+              0.1657271648005576
+            ],
+            "geometric_median": [
+              -0.5313645173114212,
+              0.21055890929280888
+            ],
+            "mean_displacement": 0.11402695596157454,
+            "median_displacement": 0.1042285592477956,
+            "covariance": [
+              [
+                0.011558422762888574,
+                0.01468720205183381
+              ],
+              [
+                0.01468720205183381,
+                0.03894954270094229
+              ]
+            ],
+            "covariance_frobenius_error": 0.0567734271288978,
+            "covariance_trace_ratio": 0.40430817096134114,
+            "hdr_50_mass": 0.6943359375,
+            "hdr_90_mass": 0.921875,
+            "mean_target_log_density": 2.4768554377702356,
+            "radius_99": 0.7422434515833211,
+            "group": 1,
+            "count": 4096,
+            "inverse_mean": [
+              0.3447351107298677,
+              -1.127591761208336
+            ],
+            "inverse_variances": [
+              0.27759659758426003,
+              1.0126175385152663
+            ],
+            "inverse_reference_mean": [
+              0.0024485596916822214,
+              -0.0267015645419724
+            ],
+            "inverse_mean_norm": 1.1791121560372664,
+            "inverse_mean_error": 1.15287436788998,
+            "inverse_variance_ratio": 0.6413053025634583,
+            "requested_class_assignment_fraction": 0.9970703125
+          },
+          {
+            "sliced_wasserstein_1": 0.08426285959073365,
+            "mean": [
+              -0.48358422863032047,
+              -0.23267949171273017
+            ],
+            "geometric_median": [
+              -0.5210909221109318,
+              -0.19864303558380664
+            ],
+            "mean_displacement": 0.09836779977577748,
+            "median_displacement": 0.07875985639024789,
+            "covariance": [
+              [
+                0.008723876619032638,
+                -0.013372817574698423
+              ],
+              [
+                -0.013372817574698423,
+                0.040368067393257163
+              ]
+            ],
+            "covariance_frobenius_error": 0.0530516687504451,
+            "covariance_trace_ratio": 0.40971232259139334,
+            "hdr_50_mass": 0.83056640625,
+            "hdr_90_mass": 0.91845703125,
+            "mean_target_log_density": 2.6852004416718422,
+            "radius_99": 0.7495144557996567,
+            "group": 2,
+            "count": 4096,
+            "inverse_mean": [
+              0.2610499905366165,
+              -0.6074076473481518
+            ],
+            "inverse_variances": [
+              0.28338800137551273,
+              1.543350455819463
+            ],
+            "inverse_reference_mean": [
+              0.0017715395386655463,
+              -0.004375670230601394
+            ],
+            "inverse_mean_norm": 0.6611286921743635,
+            "inverse_mean_error": 0.6564090802069992,
+            "inverse_variance_ratio": 0.9154948042101176,
+            "requested_class_assignment_fraction": 0.99462890625
+          },
+          {
+            "sliced_wasserstein_1": 0.08021641449838557,
+            "mean": [
+              -0.20237318410244143,
+              -0.48275652558186266
+            ],
+            "geometric_median": [
+              -0.2536989274253429,
+              -0.4858276457510529
+            ],
+            "mean_displacement": 0.08888723265045302,
+            "median_displacement": 0.05500258388015836,
+            "covariance": [
+              [
+                0.03835657979209479,
+                -0.017573280205919462
+              ],
+              [
+                -0.017573280205919462,
+                0.015314071544907406
+              ]
+            ],
+            "covariance_frobenius_error": 0.053308439978588085,
+            "covariance_trace_ratio": 0.43152392968182984,
+            "hdr_50_mass": 0.755859375,
+            "hdr_90_mass": 0.846923828125,
+            "mean_target_log_density": 2.5438091708189274,
+            "radius_99": 0.741439231504259,
+            "group": 3,
+            "count": 4096,
+            "inverse_mean": [
+              0.16937333404489777,
+              -0.7746170280550673
+            ],
+            "inverse_variances": [
+              0.3605592772826732,
+              1.5573340027959681
+            ],
+            "inverse_reference_mean": [
+              -0.005150076161801171,
+              -0.007909920340973757
+            ],
+            "inverse_mean_norm": 0.7929179443286357,
+            "inverse_mean_error": 0.7863194069393724,
+            "inverse_variance_ratio": 0.9217418569734748,
+            "requested_class_assignment_fraction": 0.999755859375
+          },
+          {
+            "sliced_wasserstein_1": 0.06811163810715887,
+            "mean": [
+              0.18930959669603453,
+              -0.47643190190865425
+            ],
+            "geometric_median": [
+              0.16146488259222194,
+              -0.5170585861080516
+            ],
+            "mean_displacement": 0.07365670515330314,
+            "median_displacement": 0.041064178905012766,
+            "covariance": [
+              [
+                0.04693589358539845,
+                0.008845219479217436
+              ],
+              [
+                0.008845219479217436,
+                0.007371380052035897
+              ]
+            ],
+            "covariance_frobenius_error": 0.0501983455967042,
+            "covariance_trace_ratio": 0.4512801629046906,
+            "hdr_50_mass": 0.820068359375,
+            "hdr_90_mass": 0.97607421875,
+            "mean_target_log_density": 3.3228402203003076,
+            "radius_99": 0.7163354075478011,
+            "group": 4,
+            "count": 4096,
+            "inverse_mean": [
+              0.08704072225435507,
+              -0.009603286548821612
+            ],
+            "inverse_variances": [
+              0.429351813180966,
+              0.5515299239301654
+            ],
+            "inverse_reference_mean": [
+              0.0034406905544553585,
+              -0.014066106014153411
+            ],
+            "inverse_mean_norm": 0.08756888969890254,
+            "inverse_mean_error": 0.08371906627408347,
+            "inverse_variance_ratio": 0.49198620112503727,
+            "requested_class_assignment_fraction": 0.999755859375
+          },
+          {
+            "sliced_wasserstein_1": 0.08185273941449464,
+            "mean": [
+              0.4769115174040053,
+              -0.20359303901929593
+            ],
+            "geometric_median": [
+              0.48708168717096945,
+              -0.24240467910932964
+            ],
+            "mean_displacement": 0.0825177481020444,
+            "median_displacement": 0.05532709360545473,
+            "covariance": [
+              [
+                0.016311309067454156,
+                0.0170034013522639
+              ],
+              [
+                0.0170034013522639,
+                0.029611487122387013
+              ]
+            ],
+            "covariance_frobenius_error": 0.06047893200799823,
+            "covariance_trace_ratio": 0.3729983456560539,
+            "hdr_50_mass": 0.7880859375,
+            "hdr_90_mass": 0.98583984375,
+            "mean_target_log_density": 3.201964995944512,
+            "radius_99": 0.7067170293885435,
+            "group": 5,
+            "count": 4096,
+            "inverse_mean": [
+              0.06792812530401715,
+              0.34599624462915657
+            ],
+            "inverse_variances": [
+              0.3745405131159431,
+              0.7314323516450815
+            ],
+            "inverse_reference_mean": [
+              0.0014381661139366707,
+              -0.0300932716300816
+            ],
+            "inverse_mean_norm": 0.35260123582426284,
+            "inverse_mean_error": 0.3819217706719615,
+            "inverse_variance_ratio": 0.5434352541126231,
+            "requested_class_assignment_fraction": 0.998046875
+          },
+          {
+            "sliced_wasserstein_1": 0.08476133406916339,
+            "mean": [
+              0.4873000366819724,
+              0.18409650426792723
+            ],
+            "geometric_median": [
+              0.5176584482602297,
+              0.1606875707902939
+            ],
+            "mean_displacement": 0.08510397863075261,
+            "median_displacement": 0.03808598755968252,
+            "covariance": [
+              [
+                0.005376813027542647,
+                -0.007235030918552853
+              ],
+              [
+                -0.007235030918552853,
+                0.03824883399140475
+              ]
+            ],
+            "covariance_frobenius_error": 0.059912105831845724,
+            "covariance_trace_ratio": 0.3573480130517306,
+            "hdr_50_mass": 0.8603515625,
+            "hdr_90_mass": 0.928955078125,
+            "mean_target_log_density": 3.0638500259998267,
+            "radius_99": 0.7222344655262846,
+            "group": 6,
+            "count": 4096,
+            "inverse_mean": [
+              0.06969019904654816,
+              0.06235421930391746
+            ],
+            "inverse_variances": [
+              0.3320575987472066,
+              1.165728064899836
+            ],
+            "inverse_reference_mean": [
+              0.01984290569998122,
+              -0.018483662546146154
+            ],
+            "inverse_mean_norm": 0.09351348837546665,
+            "inverse_mean_error": 0.09497113138203389,
+            "inverse_variance_ratio": 0.7338904962946212,
+            "requested_class_assignment_fraction": 0.999267578125
+          },
+          {
+            "sliced_wasserstein_1": 0.08290261788927854,
+            "mean": [
+              0.21058958210147694,
+              0.48654820969113644
+            ],
+            "geometric_median": [
+              0.26532744093053506,
+              0.48356445146172466
+            ],
+            "mean_displacement": 0.09215549687584788,
+            "median_displacement": 0.05072762189937068,
+            "covariance": [
+              [
+                0.03392750022352037,
+                -0.018128729742286607
+              ],
+              [
+                -0.018128729742286607,
+                0.015699650523406432
+              ]
+            ],
+            "covariance_frobenius_error": 0.05469696073164366,
+            "covariance_trace_ratio": 0.4094256283405791,
+            "hdr_50_mass": 0.502685546875,
+            "hdr_90_mass": 0.707275390625,
+            "mean_target_log_density": 1.3679122012087623,
+            "radius_99": 0.7441135469545734,
+            "group": 7,
+            "count": 4096,
+            "inverse_mean": [
+              0.17161155104213044,
+              -1.334806804232276
+            ],
+            "inverse_variances": [
+              0.3482517887016876,
+              2.738994567959761
+            ],
+            "inverse_reference_mean": [
+              0.004477570449572661,
+              -0.0013490603741789405
+            ],
+            "inverse_mean_norm": 1.345793345605434,
+            "inverse_mean_error": 1.3438911124506479,
+            "inverse_variance_ratio": 1.5458446099926817,
+            "requested_class_assignment_fraction": 0.99267578125
+          }
+        ],
+        "average": {
+          "sliced_wasserstein_1": 0.0814739509549533,
+          "hdr_50_mass": 0.7471923828125,
+          "hdr_90_mass": 0.904876708984375,
+          "mean_displacement": 0.09037384003057185,
+          "median_displacement": 0.06217959747146648,
+          "covariance_trace_ratio": 0.4132244955308365,
+          "inverse_mean_error": 0.646604264984933,
+          "inverse_mean_norm": 0.6461346422195293,
+          "inverse_variance_ratio": 0.7898733673315007,
+          "requested_class_assignment_fraction": 0.99761962890625
+        }
+      },
+      "mixture": {
+        "sw1": 0.020936269242766713,
+        "hdr50_mass": 0.748046875,
+        "hdr90_mass": 0.90509033203125,
+        "mean_log_target_density": 0.7450885805719533,
+        "mean": [
+          -0.008019037151853148,
+          -0.010062280981060212
+        ],
+        "global_covariance_trace": 0.3279019984546391,
+        "radius_quantiles_50_90_99": [
+          0.5646750842870631,
+          0.65076052577599,
+          0.7354430496531367
+        ],
+        "outside_plot_fraction": 0.0,
+        "max_group_fraction_error": 0.000885009765625,
+        "valid_local_groups": 8,
+        "local_averages": {
+          "covariance_trace_ratio": 0.42464747419637694,
+          "mean_error": 0.08903050650958622,
+          "median_error": 0.06196087152430207,
+          "inverse_gaussian_mean_error": 0.631877765270549,
+          "inverse_gaussian_variance_ratio": 0.7095665970363196
+        },
+        "groups": [
+          {
+            "group": 0,
+            "count": 4107,
+            "fraction": 0.125335693359375,
+            "inverse_gaussian_reference_mean": [
+              0.0062017050993709525,
+              0.019985025426766008
+            ],
+            "inverse_gaussian_mean_error": 0.6581884421201627,
+            "inverse_gaussian_variance_ratio": 0.6042570953779376,
+            "mean": [
+              -0.22338916552346466,
+              0.4752954016860832
+            ],
+            "median": [
+              -0.19796606429157665,
+              0.517754815742804
+            ],
+            "covariance_trace": 0.06011273202801112,
+            "covariance_trace_ratio": 0.5037402104482533,
+            "mean_error": 0.08554902047265121,
+            "median_error": 0.07420032217791019,
+            "inverse_gaussian_mean": [
+              0.2541220169286228,
+              -0.5897260080333915
+            ],
+            "inverse_gaussian_variances": [
+              0.33351403917945843,
+              0.8540120222595786
+            ]
+          },
+          {
+            "group": 1,
+            "count": 4106,
+            "fraction": 0.12530517578125,
+            "inverse_gaussian_reference_mean": [
+              0.0024485596916822214,
+              -0.0267015645419724
+            ],
+            "inverse_gaussian_mean_error": 1.0858636657178395,
+            "inverse_gaussian_variance_ratio": 0.567712794258632,
+            "mean": [
+              -0.5160567986142005,
+              0.1633249189849481
+            ],
+            "median": [
+              -0.5311491825764617,
+              0.2103964786316369
+            ],
+            "covariance_trace": 0.054769981539557,
+            "covariance_trace_ratio": 0.4384249267712468,
+            "mean_error": 0.1111085949187376,
+            "median_error": 0.10409013765653448,
+            "inverse_gaussian_mean": [
+              0.3517907795490115,
+              -1.0548357551763163
+            ],
+            "inverse_gaussian_variances": [
+              0.2905473466856166,
+              0.8516092353185836
+            ]
+          },
+          {
+            "group": 2,
+            "count": 4075,
+            "fraction": 0.124359130859375,
+            "inverse_gaussian_reference_mean": [
+              0.0017715395386655463,
+              -0.004375670230601394
+            ],
+            "inverse_gaussian_mean_error": 0.6002090286672409,
+            "inverse_gaussian_variance_ratio": 0.6121047403275892,
+            "mean": [
+              -0.4867250386021026,
+              -0.22979718863886947
+            ],
+            "median": [
+              -0.5215123936785816,
+              -0.19770442564721158
+            ],
+            "covariance_trace": 0.045817657303045524,
+            "covariance_trace_ratio": 0.38238572879957355,
+            "mean_error": 0.09924764300459478,
+            "median_error": 0.07811571511936859,
+            "inverse_gaussian_mean": [
+              0.25512350276261136,
+              -0.5484929928957093
+            ],
+            "inverse_gaussian_variances": [
+              0.2775213857560436,
+              0.9438457523704126
+            ]
+          },
+          {
+            "group": 3,
+            "count": 4096,
+            "fraction": 0.125,
+            "inverse_gaussian_reference_mean": [
+              -0.005150076161801171,
+              -0.007909920340973757
+            ],
+            "inverse_gaussian_mean_error": 0.7859880283685574,
+            "inverse_gaussian_variance_ratio": 0.919689026743926,
+            "mean": [
+              -0.20245844311892824,
+              -0.48247478473604133
+            ],
+            "median": [
+              -0.2537373050424117,
+              -0.48578701838973987
+            ],
+            "covariance_trace": 0.05396446677404499,
+            "covariance_trace_ratio": 0.43388627090250514,
+            "mean_error": 0.08867987677351585,
+            "median_error": 0.05496269853776802,
+            "inverse_gaussian_mean": [
+              0.16976534467592605,
+              -0.7741877918026603
+            ],
+            "inverse_gaussian_variances": [
+              0.3626003437396092,
+              1.5510215568062404
+            ]
+          },
+          {
+            "group": 4,
+            "count": 4103,
+            "fraction": 0.125213623046875,
+            "inverse_gaussian_reference_mean": [
+              0.0034406905544553585,
+              -0.014066106014153411
+            ],
+            "inverse_gaussian_mean_error": 0.09112213267752418,
+            "inverse_gaussian_variance_ratio": 0.4729057334006365,
+            "mean": [
+              0.18939198589596154,
+              -0.4743461984629867
+            ],
+            "median": [
+              0.16150647343599342,
+              -0.5168487226455543
+            ],
+            "covariance_trace": 0.05683701382469567,
+            "covariance_trace_ratio": 0.4723016852045489,
+            "mean_error": 0.07163802178276692,
+            "median_error": 0.04094494131336312,
+            "inverse_gaussian_mean": [
+              0.09182258326748066,
+              0.008112354350885564
+            ],
+            "inverse_gaussian_variances": [
+              0.43953767887299855,
+              0.5033029865909902
+            ]
+          },
+          {
+            "group": 5,
+            "count": 4091,
+            "fraction": 0.124847412109375,
+            "inverse_gaussian_reference_mean": [
+              0.0014381661139366707,
+              -0.0300932716300816
+            ],
+            "inverse_gaussian_mean_error": 0.40879233778907215,
+            "inverse_gaussian_variance_ratio": 0.4093132057677435,
+            "mean": [
+              0.47675033521423477,
+              -0.20477434149201718
+            ],
+            "median": [
+              0.48695684877503204,
+              -0.24268256003534625
+            ],
+            "covariance_trace": 0.04513873354174317,
+            "covariance_trace_ratio": 0.36662996012869453,
+            "mean_error": 0.0829899498600058,
+            "median_error": 0.05514926939403238,
+            "inverse_gaussian_mean": [
+              0.06663778798911053,
+              0.3734661226880153
+            ],
+            "inverse_gaussian_variances": [
+              0.37438608106256227,
+              0.45862814711199296
+            ]
+          },
+          {
+            "group": 6,
+            "count": 4123,
+            "fraction": 0.125823974609375,
+            "inverse_gaussian_reference_mean": [
+              0.01984290569998122,
+              -0.018483662546146154
+            ],
+            "inverse_gaussian_mean_error": 0.14973101473533085,
+            "inverse_gaussian_variance_ratio": 0.8408007887754141,
+            "mean": [
+              0.4805474295654713,
+              0.18629609193610402
+            ],
+            "median": [
+              0.5170863252871637,
+              0.16128584858441652
+            ],
+            "covariance_trace": 0.05115366944536182,
+            "covariance_trace_ratio": 0.41901182872235415,
+            "mean_error": 0.07853011231490988,
+            "median_error": 0.037929509160125864,
+            "inverse_gaussian_mean": [
+              0.08172154273547866,
+              0.11786299510376115
+            ],
+            "inverse_gaussian_variances": [
+              0.35305815015192366,
+              1.3629190613929676
+            ]
+          },
+          {
+            "group": 7,
+            "count": 4067,
+            "fraction": 0.124114990234375,
+            "inverse_gaussian_reference_mean": [
+              0.004477570449572661,
+              -0.0013490603741789405
+            ],
+            "inverse_gaussian_mean_error": 1.2751274720886636,
+            "inverse_gaussian_variance_ratio": 1.2497493916386786,
+            "mean": [
+              0.2157701087412215,
+              0.48589736980644616
+            ],
+            "median": [
+              0.26680565943019446,
+              0.48271827065586265
+            ],
+            "covariance_trace": 0.046157292389060564,
+            "covariance_trace_ratio": 0.380799182593839,
+            "mean_error": 0.09450083294950772,
+            "median_error": 0.050294378835313916,
+            "inverse_gaussian_mean": [
+              0.16370882369715978,
+              -1.2664954859172577
+            ],
+            "inverse_gaussian_variances": [
+              0.34194303158038664,
+              2.153963886317809
+            ]
+          }
+        ]
+      }
+    },
+    "4": {
+      "vs_target": {
+        "by_class": [
+          {
+            "sliced_wasserstein_1": 0.1277680714991434,
+            "mean": [
+              -0.2763580410726547,
+              0.4935039583283469
+            ],
+            "geometric_median": [
+              -0.2605497021173287,
+              0.5116775978373749
+            ],
+            "mean_displacement": 0.1351804888667771,
+            "median_displacement": 0.13272950788096605,
+            "covariance": [
+              [
+                0.019585965166297438,
+                0.00688472103160602
+              ],
+              [
+                0.00688472103160602,
+                0.0032250806632977834
+              ]
+            ],
+            "covariance_frobenius_error": 0.07510706018364066,
+            "covariance_trace_ratio": 0.19115486252380923,
+            "hdr_50_mass": 0.93701171875,
+            "hdr_90_mass": 0.989990234375,
+            "mean_target_log_density": 3.5303038619031923,
+            "radius_99": 0.6882388026521977,
+            "group": 0,
+            "count": 4096,
+            "inverse_mean": [
+              0.3395343497205863,
+              0.16553855152465763
+            ],
+            "inverse_variances": [
+              0.13245820567661543,
+              0.29847797199078363
+            ],
+            "inverse_reference_mean": [
+              0.0062017050993709525,
+              0.019985025426766008
+            ],
+            "inverse_mean_norm": 0.37773878101283587,
+            "inverse_mean_error": 0.36372583209019277,
+            "inverse_variance_ratio": 0.21927623440535426,
+            "requested_class_assignment_fraction": 1.0
+          },
+          {
+            "sliced_wasserstein_1": 0.15567316922241714,
+            "mean": [
+              -0.5863084686134243,
+              0.10628241359876256
+            ],
+            "geometric_median": [
+              -0.5886380105076081,
+              0.12614844579235093
+            ],
+            "mean_displacement": 0.18887135969907115,
+            "median_displacement": 0.1973241688307222,
+            "covariance": [
+              [
+                0.002163436168155447,
+                0.004981547256007414
+              ],
+              [
+                0.004981547256007414,
+                0.01374824243911488
+              ]
+            ],
+            "covariance_frobenius_error": 0.08636242338339536,
+            "covariance_trace_ratio": 0.12737043782207075,
+            "hdr_50_mass": 0.72509765625,
+            "hdr_90_mass": 0.962158203125,
+            "mean_target_log_density": 3.0259529564055785,
+            "radius_99": 0.6836913753354935,
+            "group": 1,
+            "count": 4096,
+            "inverse_mean": [
+              0.5723054746248937,
+              -1.0145214514864362
+            ],
+            "inverse_variances": [
+              0.07923604112824124,
+              0.14630120240367414
+            ],
+            "inverse_reference_mean": [
+              0.0024485596916822214,
+              -0.0267015645419724
+            ],
+            "inverse_mean_norm": 1.1648121444300665,
+            "inverse_mean_error": 1.1404056438566808,
+            "inverse_variance_ratio": 0.11210405013839198,
+            "requested_class_assignment_fraction": 1.0
+          },
+          {
+            "sliced_wasserstein_1": 0.15020284001964512,
+            "mean": [
+              -0.49037783083167596,
+              -0.3227923242448014
+            ],
+            "geometric_median": [
+              -0.5061450765304506,
+              -0.30931214690458947
+            ],
+            "mean_displacement": 0.17182243084529397,
+            "median_displacement": 0.1821498745184917,
+            "covariance": [
+              [
+                0.0033233777387634694,
+                -0.005871214778633459
+              ],
+              [
+                -0.005871214778633459,
+                0.01352751605299672
+              ]
+            ],
+            "covariance_frobenius_error": 0.08130481673819924,
+            "covariance_trace_ratio": 0.1406344558576574,
+            "hdr_50_mass": 0.828125,
+            "hdr_90_mass": 0.945068359375,
+            "mean_target_log_density": 3.1490242176105463,
+            "radius_99": 0.6980612895598711,
+            "group": 2,
+            "count": 4096,
+            "inverse_mean": [
+              0.49450804209399785,
+              -0.48241630691407017
+            ],
+            "inverse_variances": [
+              0.0949915651221402,
+              0.7639267909393671
+            ],
+            "inverse_reference_mean": [
+              0.0017715395386655463,
+              -0.004375670230601394
+            ],
+            "inverse_mean_norm": 0.6908427439528112,
+            "inverse_mean_error": 0.6865217485784388,
+            "inverse_variance_ratio": 0.4304586073161522,
+            "requested_class_assignment_fraction": 0.998291015625
+          },
+          {
+            "sliced_wasserstein_1": 0.1325755794226568,
+            "mean": [
+              -0.17886520838794695,
+              -0.539475939127442
+            ],
+            "geometric_median": [
+              -0.20392025912911937,
+              -0.538629048306459
+            ],
+            "mean_displacement": 0.1362558551936299,
+            "median_displacement": 0.11830353407661413,
+            "covariance": [
+              [
+                0.015979074955349896,
+                -0.00867801264123826
+              ],
+              [
+                -0.00867801264123826,
+                0.005687017035980031
+              ]
+            ],
+            "covariance_frobenius_error": 0.08009767237072021,
+            "covariance_trace_ratio": 0.1742001806208922,
+            "hdr_50_mass": 0.71826171875,
+            "hdr_90_mass": 0.84375,
+            "mean_target_log_density": 2.6122574854243386,
+            "radius_99": 0.7006509580615798,
+            "group": 3,
+            "count": 4096,
+            "inverse_mean": [
+              0.33607510668624074,
+              -0.8624508282899184
+            ],
+            "inverse_variances": [
+              0.14547848504073396,
+              1.4074691237133092
+            ],
+            "inverse_reference_mean": [
+              -0.005150076161801171,
+              -0.007909920340973757
+            ],
+            "inverse_mean_norm": 0.9256175822401681,
+            "inverse_mean_error": 0.9201493296024762,
+            "inverse_variance_ratio": 0.7463485208190391,
+            "requested_class_assignment_fraction": 1.0
+          },
+          {
+            "sliced_wasserstein_1": 0.11777263387032352,
+            "mean": [
+              0.24367662529004974,
+              -0.5006465400817888
+            ],
+            "geometric_median": [
+              0.23943376948961922,
+              -0.5210564294298934
+            ],
+            "mean_displacement": 0.11897279397293631,
+            "median_displacement": 0.11192006348270853,
+            "covariance": [
+              [
+                0.023249861043732587,
+                0.0053282999697534
+              ],
+              [
+                0.0053282999697534,
+                0.0025495491812433956
+              ]
+            ],
+            "covariance_frobenius_error": 0.07355791221251363,
+            "covariance_trace_ratio": 0.21438678963892366,
+            "hdr_50_mass": 0.950927734375,
+            "hdr_90_mass": 0.996337890625,
+            "mean_target_log_density": 3.607878479879978,
+            "radius_99": 0.6778407255353812,
+            "group": 4,
+            "count": 4096,
+            "inverse_mean": [
+              0.2780782599248153,
+              -0.1862912433987516
+            ],
+            "inverse_variances": [
+              0.17533671901434225,
+              0.13110486337068258
+            ],
+            "inverse_reference_mean": [
+              0.0034406905544553585,
+              -0.014066106014153411
+            ],
+            "inverse_mean_norm": 0.3347117356918727,
+            "inverse_mean_error": 0.32417170212219787,
+            "inverse_variance_ratio": 0.15370357534475354,
+            "requested_class_assignment_fraction": 1.0
+          },
+          {
+            "sliced_wasserstein_1": 0.13144205004364698,
+            "mean": [
+              0.5329787342561758,
+              -0.17911254174924807
+            ],
+            "geometric_median": [
+              0.5375916678654163,
+              -0.1946135372287568
+            ],
+            "mean_displacement": 0.12822803636772162,
+            "median_displacement": 0.1201589485789774,
+            "covariance": [
+              [
+                0.0045576969411906185,
+                0.006857790932119977
+              ],
+              [
+                0.006857790932119977,
+                0.012049218847173119
+              ]
+            ],
+            "covariance_frobenius_error": 0.08463687466880068,
+            "covariance_trace_ratio": 0.13488621402542908,
+            "hdr_50_mass": 0.988037109375,
+            "hdr_90_mass": 0.9990234375,
+            "mean_target_log_density": 3.63017253730965,
+            "radius_99": 0.6556316244177584,
+            "group": 5,
+            "count": 4096,
+            "inverse_mean": [
+              0.2567986831143396,
+              0.3780496229243953
+            ],
+            "inverse_variances": [
+              0.11007939168316162,
+              0.054938940809848444
+            ],
+            "inverse_reference_mean": [
+              0.0014381661139366707,
+              -0.0300932716300816
+            ],
+            "inverse_mean_norm": 0.4570197818941063,
+            "inverse_mean_error": 0.48144534063382516,
+            "inverse_variance_ratio": 0.08108406843323174,
+            "requested_class_assignment_fraction": 1.0
+          },
+          {
+            "sliced_wasserstein_1": 0.12911469016687716,
+            "mean": [
+              0.5070827091424235,
+              0.22191039228380305
+            ],
+            "geometric_median": [
+              0.5193731268944205,
+              0.20714584023709706
+            ],
+            "mean_displacement": 0.1131035283967705,
+            "median_displacement": 0.074891410584305,
+            "covariance": [
+              [
+                0.00140238037721943,
+                -0.0033439186619771606
+              ],
+              [
+                -0.0033439186619771606,
+                0.015049448148404813
+              ]
+            ],
+            "covariance_frobenius_error": 0.08282067737730567,
+            "covariance_trace_ratio": 0.13476082617516796,
+            "hdr_50_mass": 0.935791015625,
+            "hdr_90_mass": 0.974609375,
+            "mean_target_log_density": 3.250344169769499,
+            "radius_99": 0.6742590992648934,
+            "group": 6,
+            "count": 4096,
+            "inverse_mean": [
+              0.16014134952035236,
+              0.5124221894849643
+            ],
+            "inverse_variances": [
+              0.1248699050288931,
+              0.7204504914841914
+            ],
+            "inverse_reference_mean": [
+              0.01984290569998122,
+              -0.018483662546146154
+            ],
+            "inverse_mean_norm": 0.5368628801684507,
+            "inverse_mean_error": 0.5491308378331136,
+            "inverse_variance_ratio": 0.41419317889208085,
+            "requested_class_assignment_fraction": 0.99951171875
+          },
+          {
+            "sliced_wasserstein_1": 0.12834525633268296,
+            "mean": [
+              0.1974599558552086,
+              0.5371228140575113
+            ],
+            "geometric_median": [
+              0.23515951086863726,
+              0.5280440923143946
+            ],
+            "mean_displacement": 0.13339839035445064,
+            "median_displacement": 0.09534931703799575,
+            "covariance": [
+              [
+                0.01605345825691644,
+                -0.008848257292269837
+              ],
+              [
+                -0.008848257292269837,
+                0.005818143228943965
+              ]
+            ],
+            "covariance_frobenius_error": 0.07805819312186948,
+            "covariance_trace_ratio": 0.18044143269131108,
+            "hdr_50_mass": 0.314453125,
+            "hdr_90_mass": 0.59130859375,
+            "mean_target_log_density": 1.1747634724902463,
+            "radius_99": 0.7007394671639666,
+            "group": 7,
+            "count": 4096,
+            "inverse_mean": [
+              0.3470154193668319,
+              -1.8682267200127027
+            ],
+            "inverse_variances": [
+              0.13167640790714047,
+              1.5423363566194612
+            ],
+            "inverse_reference_mean": [
+              0.004477570449572661,
+              -0.0013490603741789405
+            ],
+            "inverse_mean_norm": 1.9001817751593557,
+            "inverse_mean_error": 1.8980422476853023,
+            "inverse_variance_ratio": 0.8382109200707928,
+            "requested_class_assignment_fraction": 0.997314453125
+          }
+        ],
+        "average": {
+          "sliced_wasserstein_1": 0.13411178632217413,
+          "hdr_50_mass": 0.799713134765625,
+          "hdr_90_mass": 0.91278076171875,
+          "mean_displacement": 0.1407291104620814,
+          "median_displacement": 0.1291033531238476,
+          "covariance_trace_ratio": 0.16222939991940766,
+          "inverse_mean_error": 0.7954490853002785,
+          "inverse_mean_norm": 0.7984734280687084,
+          "inverse_variance_ratio": 0.3744223944274746,
+          "requested_class_assignment_fraction": 0.9993896484375
+        }
+      },
+      "mixture": {
+        "sw1": 0.036385505444503106,
+        "hdr50_mass": 0.800445556640625,
+        "hdr90_mass": 0.913116455078125,
+        "mean_log_target_density": 0.933751815938703,
+        "mean": [
+          -0.0063389405452305425,
+          -0.02290097086685705
+        ],
+        "global_covariance_trace": 0.344525638144652,
+        "radius_quantiles_50_90_99": [
+          0.5839056959851807,
+          0.63663670155978,
+          0.6893983896688775
+        ],
+        "outside_plot_fraction": 0.0,
+        "max_group_fraction_error": 0.000335693359375,
+        "valid_local_groups": 8,
+        "local_averages": {
+          "covariance_trace_ratio": 0.16531907536083146,
+          "mean_error": 0.1404060382443338,
+          "median_error": 0.12906573567702526,
+          "inverse_gaussian_mean_error": 0.7934594668700419,
+          "inverse_gaussian_variance_ratio": 0.3646537903874719
+        },
+        "groups": [
+          {
+            "group": 0,
+            "count": 4096,
+            "fraction": 0.125,
+            "inverse_gaussian_reference_mean": [
+              0.0062017050993709525,
+              0.019985025426766008
+            ],
+            "inverse_gaussian_mean_error": 0.36372583209019277,
+            "inverse_gaussian_variance_ratio": 0.21927623440535426,
+            "mean": [
+              -0.2763580410726547,
+              0.4935039583283469
+            ],
+            "median": [
+              -0.2605497021173287,
+              0.5116775978373749
+            ],
+            "covariance_trace": 0.02281104582959522,
+            "covariance_trace_ratio": 0.19115486252380923,
+            "mean_error": 0.1351804888667771,
+            "median_error": 0.13272950788096605,
+            "inverse_gaussian_mean": [
+              0.3395343497205863,
+              0.16553855152465763
+            ],
+            "inverse_gaussian_variances": [
+              0.13245820567661543,
+              0.29847797199078363
+            ]
+          },
+          {
+            "group": 1,
+            "count": 4103,
+            "fraction": 0.125213623046875,
+            "inverse_gaussian_reference_mean": [
+              0.0024485596916822214,
+              -0.0267015645419724
+            ],
+            "inverse_gaussian_mean_error": 1.1306885210031334,
+            "inverse_gaussian_variance_ratio": 0.16372062265509627,
+            "mean": [
+              -0.5851951233948218,
+              0.10479705618943427
+            ],
+            "median": [
+              -0.588629256388019,
+              0.12600152761757988
+            ],
+            "covariance_trace": 0.01795261030599473,
+            "covariance_trace_ratio": 0.14370776906458918,
+            "mean_error": 0.18822746625595765,
+            "median_error": 0.1974093369435692,
+            "inverse_gaussian_mean": [
+              0.5747251974170117,
+              -1.0018712838432053
+            ],
+            "inverse_gaussian_variances": [
+              0.08296671900175175,
+              0.2464156529765612
+            ]
+          },
+          {
+            "group": 2,
+            "count": 4089,
+            "fraction": 0.124786376953125,
+            "inverse_gaussian_reference_mean": [
+              0.0017715395386655463,
+              -0.004375670230601394
+            ],
+            "inverse_gaussian_mean_error": 0.6734595086726044,
+            "inverse_gaussian_variance_ratio": 0.33736638832324173,
+            "mean": [
+              -0.4913307633255507,
+              -0.32203641857457177
+            ],
+            "median": [
+              -0.5062403318410623,
+              -0.30912766704640937
+            ],
+            "covariance_trace": 0.015962363381354417,
+            "covariance_trace_ratio": 0.13321894470883636,
+            "mean_error": 0.17164598302755446,
+            "median_error": 0.18197733903098992,
+            "inverse_gaussian_mean": [
+              0.49299104744387223,
+              -0.4650828493312882
+            ],
+            "inverse_gaussian_variances": [
+              0.09376842948405807,
+              0.5793977675068269
+            ]
+          },
+          {
+            "group": 3,
+            "count": 4096,
+            "fraction": 0.125,
+            "inverse_gaussian_reference_mean": [
+              -0.005150076161801171,
+              -0.007909920340973757
+            ],
+            "inverse_gaussian_mean_error": 0.9201493296024762,
+            "inverse_gaussian_variance_ratio": 0.7463485208190391,
+            "mean": [
+              -0.17886520838794695,
+              -0.539475939127442
+            ],
+            "median": [
+              -0.20392025912911937,
+              -0.538629048306459
+            ],
+            "covariance_trace": 0.021666091991329926,
+            "covariance_trace_ratio": 0.1742001806208922,
+            "mean_error": 0.1362558551936299,
+            "median_error": 0.11830353407661413,
+            "inverse_gaussian_mean": [
+              0.33607510668624074,
+              -0.8624508282899184
+            ],
+            "inverse_gaussian_variances": [
+              0.14547848504073396,
+              1.4074691237133092
+            ]
+          },
+          {
+            "group": 4,
+            "count": 4096,
+            "fraction": 0.125,
+            "inverse_gaussian_reference_mean": [
+              0.0034406905544553585,
+              -0.014066106014153411
+            ],
+            "inverse_gaussian_mean_error": 0.32417170212219787,
+            "inverse_gaussian_variance_ratio": 0.15370357534475354,
+            "mean": [
+              0.24367662529004974,
+              -0.5006465400817888
+            ],
+            "median": [
+              0.23943376948961922,
+              -0.5210564294298934
+            ],
+            "covariance_trace": 0.025799410224975984,
+            "covariance_trace_ratio": 0.21438678963892366,
+            "mean_error": 0.11897279397293631,
+            "median_error": 0.11192006348270853,
+            "inverse_gaussian_mean": [
+              0.2780782599248153,
+              -0.1862912433987516
+            ],
+            "inverse_gaussian_variances": [
+              0.17533671901434225,
+              0.13110486337068258
+            ]
+          },
+          {
+            "group": 5,
+            "count": 4098,
+            "fraction": 0.12506103515625,
+            "inverse_gaussian_reference_mean": [
+              0.0014381661139366707,
+              -0.0300932716300816
+            ],
+            "inverse_gaussian_mean_error": 0.4841672760057045,
+            "inverse_gaussian_variance_ratio": 0.09017118745505237,
+            "mean": [
+              0.5326557215839522,
+              -0.17864242592957616
+            ],
+            "median": [
+              0.5375889651492725,
+              -0.194576150161488
+            ],
+            "covariance_trace": 0.017268405070230874,
+            "covariance_trace_ratio": 0.14025902291941875,
+            "mean_error": 0.1278439964672781,
+            "median_error": 0.12017494452766887,
+            "inverse_gaussian_mean": [
+              0.25773446576575026,
+              0.38067449480196436
+            ],
+            "inverse_gaussian_variances": [
+              0.11191241094900974,
+              0.07159958197719805
+            ]
+          },
+          {
+            "group": 6,
+            "count": 4105,
+            "fraction": 0.125274658203125,
+            "inverse_gaussian_reference_mean": [
+              0.01984290569998122,
+              -0.018483662546146154
+            ],
+            "inverse_gaussian_mean_error": 0.5726281785599089,
+            "inverse_gaussian_variance_ratio": 0.43726578323593396,
+            "mean": [
+              0.5051079690059359,
+              0.22279194298707375
+            ],
+            "median": [
+              0.5192744441531026,
+              0.2072844286609564
+            ],
+            "covariance_trace": 0.01850684945070142,
+            "covariance_trace_ratio": 0.1515939895672688,
+            "mean_error": 0.1116181156702121,
+            "median_error": 0.0749703829646434,
+            "inverse_gaussian_mean": [
+              0.16304066340519216,
+              0.5359506735740464
+            ],
+            "inverse_gaussian_variances": [
+              0.1284651845435878,
+              0.7639437301935429
+            ]
+          },
+          {
+            "group": 7,
+            "count": 4085,
+            "fraction": 0.124664306640625,
+            "inverse_gaussian_reference_mean": [
+              0.004477570449572661,
+              -0.0013490603741789405
+            ],
+            "inverse_gaussian_mean_error": 1.8786853869041165,
+            "inverse_gaussian_variance_ratio": 0.7693780108613042,
+            "mean": [
+              0.19892198078903156,
+              0.5368104718890009
+            ],
+            "median": [
+              0.23555163949524544,
+              0.5278038954532651
+            ],
+            "covariance_trace": 0.02109458775807978,
+            "covariance_trace_ratio": 0.17403104384291365,
+            "mean_error": 0.13350360650032472,
+            "median_error": 0.09504077650904194,
+            "inverse_gaussian_mean": [
+              0.3447648007007706,
+              -1.8489592421752639
+            ],
+            "inverse_gaussian_variances": [
+              0.13014009992088513,
+              1.40640467668395
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

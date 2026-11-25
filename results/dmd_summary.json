@@ -1,0 +1,131 @@
+{
+  "config": {
+    "stage": "all",
+    "run_name": "dmd",
+    "device": "cuda",
+    "seed": 42,
+    "teacher_run": "teacher",
+    "teacher_seed": 42,
+    "width": 128,
+    "levels": 2,
+    "methods": [
+      "dmd1",
+      "dmd2"
+    ],
+    "modes": [
+      "bsim",
+      "bptt"
+    ],
+    "scales": [
+      2.0,
+      4.0
+    ],
+    "schedule": [
+      0.999,
+      0.749,
+      0.499,
+      0.249
+    ],
+    "gen_updates": 20000,
+    "batch_size": 2048,
+    "lr": 0.001,
+    "regression_lambda": 0.25,
+    "pairs": 65536,
+    "pair_steps": 256,
+    "weight": "kl",
+    "cs": 1.0,
+    "l1_floor": 0.05,
+    "grad_clip": 10.0,
+    "dm_low": 0.02,
+    "dm_high": 0.98,
+    "log_every": 500,
+    "probe_every": 2000,
+    "eval_samples": 4096,
+    "eval_seed": 1234,
+    "teacher_steps": 40,
+    "overlay_samples": 32000,
+    "overlay_seed": 20260926
+  },
+  "arms": [
+    "dmd1_bsim_w2",
+    "dmd1_bsim_w4",
+    "dmd1_bptt_w2",
+    "dmd1_bptt_w4",
+    "dmd2_bsim_w2",
+    "dmd2_bsim_w4",
+    "dmd2_bptt_w2",
+    "dmd2_bptt_w4"
+  ],
+  "per_arm": {
+    "dmd1_bsim_w2": {
+      "student_sw1": 0.10102783887971689,
+      "teacher256_sw1": 0.08208792371714073,
+      "student_hdr50": 0.19573974609375,
+      "student_inverse_mean_error": 2.211850007082555,
+      "renoise_redraw_rmse": 0.23066177822744066,
+      "solver_teacher40_vs_80": 0.00400205884983392
+    },
+    "dmd1_bsim_w4": {
+      "student_sw1": 0.13511528764983322,
+      "teacher256_sw1": 0.1355374761804342,
+      "student_hdr50": 0.304779052734375,
+      "student_inverse_mean_error": 1.8108771009848619,
+      "renoise_redraw_rmse": 0.1611907216243214,
+      "solver_teacher40_vs_80": 0.030651939951123502
+    },
+    "dmd1_bptt_w2": {
+      "student_sw1": 0.10046657687600585,
+      "teacher256_sw1": 0.08208792371714073,
+      "student_hdr50": 0.175506591796875,
+      "student_inverse_mean_error": 3.194294650747322,
+      "renoise_redraw_rmse": 0.22157256145268223,
+      "solver_teacher40_vs_80": 0.00400205884983392
+    },
+    "dmd1_bptt_w4": {
+      "student_sw1": 0.12393688810482875,
+      "teacher256_sw1": 0.1355374761804342,
+      "student_hdr50": 0.402862548828125,
+      "student_inverse_mean_error": 1.348758944668011,
+      "renoise_redraw_rmse": 0.17274349860874633,
+      "solver_teacher40_vs_80": 0.030651939951123502
+    },
+    "dmd2_bsim_w2": {
+      "student_sw1": 0.06976056247996552,
+      "teacher256_sw1": 0.08208792371714073,
+      "student_hdr50": 0.195892333984375,
+      "student_inverse_mean_error": 2.117849730309814,
+      "renoise_redraw_rmse": 0.2681666162272614,
+      "solver_teacher40_vs_80": 0.00400205884983392
+    },
+    "dmd2_bsim_w4": {
+      "student_sw1": 0.11891839619003149,
+      "teacher256_sw1": 0.1355374761804342,
+      "student_hdr50": 0.2459716796875,
+      "student_inverse_mean_error": 1.9192700145545178,
+      "renoise_redraw_rmse": 0.17477173560780548,
+      "solver_teacher40_vs_80": 0.030651939951123502
+    },
+    "dmd2_bptt_w2": {
+      "student_sw1": 0.08069758024784984,
+      "teacher256_sw1": 0.08208792371714073,
+      "student_hdr50": 0.4803466796875,
+      "student_inverse_mean_error": 0.8918987746885587,
+      "renoise_redraw_rmse": 0.2425128755390262,
+      "solver_teacher40_vs_80": 0.00400205884983392
+    },
+    "dmd2_bptt_w4": {
+      "student_sw1": 0.12139188176579432,
+      "teacher256_sw1": 0.1355374761804342,
+      "student_hdr50": 0.38543701171875,
+      "student_inverse_mean_error": 1.3467722966703357,
+      "renoise_redraw_rmse": 0.1668948697599697,
+      "solver_teacher40_vs_80": 0.030651939951123502
+    }
+  },
+  "caveats": [
+    "Single training seed (42); DMD1 is 1-step in the paper and is extended to the 4-step schedule with losses on the final output; bsim mode carries gradient through the last step only.",
+    "Regression pairs use the guided teacher Heun-256 sampler; the trajectory figure row shows Heun-40 for progression visualization.",
+    "DM evaluation and fake-critic times use U(0.02, 0.98) (paper: U(0.02T, 0.98T) for DM, U(0,1) for the critic; the toy avoids the t->0 score singularity).",
+    "No EMA, no GAN loss (DMD2 additions kept off); guidance w>1 means the distilled distribution is the guided (biased) one, not the exact target."
+  ]
+}
