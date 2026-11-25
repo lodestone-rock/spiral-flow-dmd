@@ -22,6 +22,7 @@ experiment are not.
 | `tests/test_pipeline.py` | 19 fast unit tests (data geometry, score identity, schedule, rollout grad masks, Heun snapshots, interpolation grid, checkpoint checks). |
 | `requirements.txt` | Torch/NumPy/Matplotlib requirements. |
 | `LICENSE` | MIT license. |
+| `CITATION.cff` | Machine-readable citation metadata (GitHub “Cite this repository”). |
 | `runs/` | Generated artifacts (checkpoints, histories, metrics, figures); not required for sharing. |
 | `figures/` | Curated PNGs from the recorded run. |
 
@@ -231,6 +232,24 @@ clockwise behavior, which validates the extraction.
   rotated target is a geometric reference only; smooth clockwise motion is
   evidence of continuity/direction, not exact rotational equivariance, and the
   scalar encoding has no periodic `0→7` interval.
+
+## Citation
+
+If you use this code or the experiments, please cite the repository. GitHub also
+shows a **Cite this repository** button from [`CITATION.cff`](CITATION.cff).
+
+```bibtex
+@misc{lodestone2026spiraldmd,
+  author       = {Lodestone},
+  title        = {Spiral Flow Matching and {DMD}/{DMD2} Distillation},
+  year         = {2026},
+  howpublished = {\url{https://github.com/lodestone-rock/spiral-flow-dmd}},
+  note         = {GitHub repository}
+}
+```
+
+Plain text: Lodestone (2026). *Spiral Flow Matching and DMD/DMD2 Distillation*.
+GitHub. https://github.com/lodestone-rock/spiral-flow-dmd
 
 ## License
 

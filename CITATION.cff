@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use this code or these experiments, please cite this repository."
+title: "Spiral Flow Matching and DMD/DMD2 Distillation"
+abstract: >-
+  A self-contained eight-spiral toy study: class-conditional CFG flow matching,
+  DMD/DMD2 four-step distillation, and frozen clockwise interpolation between
+  class conditions.
+authors:
+  - family-names: "Lodestone"
+    alias: "lodestone-rock"
+repository-code: "https://github.com/lodestone-rock/spiral-flow-dmd"
+url: "https://github.com/lodestone-rock/spiral-flow-dmd"
+license: MIT
+type: software
+keywords:
+  - flow matching
+  - distribution matching distillation
+  - DMD
+  - DMD2
+  - diffusion models
+  - class conditioning
+  - interpolation
+  - toy model
+  - spiral
+year: 2026
+date-released: 2026-11-25
