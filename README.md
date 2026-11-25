@@ -19,6 +19,8 @@ experiment are not.
 | `dmd.py` | DMD and DMD2 distillation, 8 arms = {DMD1, DMD2} × {backward simulation, BPTT} × guidance `w ∈ {2,4}`, plus evaluation and comparison figures. |
 | `interpolate.py` | Frozen clockwise class-condition sweep `g=7→0` with shared noise and rotated geometric references; no retraining. |
 | `run_all.sh` | Tests → teacher → all DMD arms → interpolation → prints figure paths. |
+| `AGENTS.md` | Agent entrypoint: commands, smoke/full runs, artifact paths, invariants. |
+| `CLAUDE.md` | Pointer to `AGENTS.md` for Claude-based agents. |
 | `tests/test_pipeline.py` | 19 fast unit tests (data geometry, score identity, schedule, rollout grad masks, Heun snapshots, interpolation grid, checkpoint checks). |
 | `requirements.txt` | Torch/NumPy/Matplotlib requirements. |
 | `LICENSE` | MIT license. |
