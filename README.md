@@ -21,6 +21,7 @@ experiment are not.
 | `run_all.sh` | Tests → teacher → all DMD arms → interpolation → prints figure paths. |
 | `tests/test_pipeline.py` | 19 fast unit tests (data geometry, score identity, schedule, rollout grad masks, Heun snapshots, interpolation grid, checkpoint checks). |
 | `requirements.txt` | Torch/NumPy/Matplotlib requirements. |
+| `LICENSE` | MIT license. |
 | `runs/` | Generated artifacts (checkpoints, histories, metrics, figures); not required for sharing. |
 | `figures/` | Curated PNGs from the recorded run. |
 
@@ -230,6 +231,10 @@ clockwise behavior, which validates the extraction.
   rotated target is a geometric reference only; smooth clockwise motion is
   evidence of continuity/direction, not exact rotational equivariance, and the
   scalar encoding has no periodic `0→7` interval.
+
+## License
+
+MIT © 2026 Lodestone. See [LICENSE](LICENSE).
 
 ## Provenance
 
