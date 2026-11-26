@@ -379,6 +379,9 @@ Key figures:
 - `figures/imbalanced_vs_balanced.png` — random class prior and the rerun comparison
 - `figures/class_prior_imb.png` — prior and teacher SW1/HDR50 under imbalance
 - `figures/teacher_imb_samples.png` — imbalanced teacher sample grid
+- `figures/interpolation_imb_vs_balanced.png` — balanced vs imbalanced class sweep
+- `figures/interpolation_all_w2_imb.png` — full 7→0 grid on the imbalanced teacher
+- `figures/interpolation_paths_w{1,2}_imb.png`, `figures/interpolation_4to3_w1_imb.png` — imbalanced path/spread diagnostics
 
 These numbers match the original experiment's recorded table and the recorded
 clockwise behavior, which validates the extraction.
@@ -480,11 +483,33 @@ field under the imbalanced dataset.
 
 ### Interpolation
 
-The frozen class sweep remains smooth under imbalance: `w=2` rotates
-−313.2° over 28/28 clockwise steps (balanced: −311.7°). Unseen-condition SW1 is
-0.0847 (balanced 0.0757), HDR50 38.7% (75.9%), and inverse center norm 1.13
-(0.63); `w=1` unseen SW1 is 0.0202. The class encoding therefore stays
-continuous, but the `w=2` CFG expansion is visibly worse without retraining.
+The frozen class sweep remains smooth under imbalance, and **unseen conditions
+are as good as the trained endpoints**; the quality deficit is local to the
+teacher's class-conditional field, not to interpolation.
+
+| CFG | total rotation | clockwise | unseen SW1 | unseen HDR50 | unseen center norm | trained → unseen SW1 |
+|---|---|---|---|---|---|---|
+| w=1 balanced | −310.3° | 28/28 | 0.0177 | 39.3% | 0.40 | 0.0182 → 0.0177 |
+| w=1 imbalanced | **−315.9°** | 28/28 | **0.0202** | 28.0% | 0.84 | 0.0171 → 0.0202 |
+| w=2 balanced | −311.7° | 28/28 | **0.0757** | 75.9% | 0.63 | 0.0757 → 0.0757 |
+| w=2 imbalanced | −313.2° | 28/28 | 0.0847 | 38.7% | 1.13 | 0.0868 → 0.0847 |
+
+The mean absolute step is 11.1–11.2° in every run (geometric expectation
+11.25°), so the sweep does not stall or reverse. Interpolated HDR50 follows the
+neighbouring class quality: the imbalanced `w=2` curve oscillates between 5%
+and 95% across conditions, matching the per-class collapse in the teacher table,
+while the balanced curve stays near 70–90%. At `w=1` the imbalanced teacher is
+even slightly closer to the geometric −315° rotation than the balanced one.
+
+![Frozen interpolation on balanced vs imbalanced teachers](figures/interpolation_imb_vs_balanced.png)
+
+*Per-condition SW1/HDR50 and angular smoothness. Hollow dots are unseen
+fractional conditions; filled dots are trained integer classes.*
+
+The class encoding therefore stays continuous; the `w=2` CFG expansion is
+visibly worse without retraining, and the unseen conditions faithfully
+interpolate that local behavior rather than adding an interpolation-specific
+error.
 
 Curated numbers: `results/imbalanced_summary.json`.
 

@@ -176,8 +176,11 @@ Runs: `teacher_imb`, `dmd_imb`, `pdd_imb`, plus `pdd_imb_{w1,shift2,euler128,dat
 - DMD ranking flips: balanced best is `dmd2_bsim_w2` (0.06976), imbalanced
   weighted best is `dmd1_bptt_w2` (0.07902); `dmd2_bsim_w2` degrades to 0.10391
   weighted / 0.11867 uniform.
-- Interpolation stays smooth: `w=2` −313.2°, 28/28 clockwise; unseen SW1
-  0.08468, uniform HDR50 38.7%.
+- Interpolation stays smooth: `w=2` −313.2°, `w=1` −315.9°, 28/28 clockwise
+  steps in both; mean |step| 11.2°. Unseen SW1/HDR50 are 0.0847/38.7% (`w=2`)
+  and 0.0202/28.0% (`w=1`), essentially equal to the trained classes
+  (0.0868/40.6% and 0.0171/28.3%). The unseen conditions interpolate the
+  teacher's uneven per-class quality, not an extra interpolation error.
 
 Use `--dmd-run-name dmd_imb --controls-from dmd_imb/evaluation_s40_n4096_seed1234`
 for PDD so noise and prior match the DMD baseline. The re-evaluation commands for
