@@ -56,10 +56,11 @@ import torch
 from torch import nn
 
 from core import (FullCFGMLP, Geometry, annotate_outside, average_classes,
-                  conditional_metrics, depth_velocity, describe_samples,
-                  distribution_metrics, encode_groups, fingerprint, freeze_teacher,
-                  make_generator, mixture_diagnostics, sample_data, sample_depth,
-                  save_json, setup_device, state_digest, target_view_bounds)
+                  class_probs_from_config, conditional_metrics, depth_velocity,
+                  describe_samples, distribution_metrics, encode_groups, fingerprint,
+                  freeze_teacher, make_generator, mixture_diagnostics, sample_data,
+                  sample_depth, sample_groups, save_json, setup_device, state_digest,
+                  target_view_bounds)
 
 ROOT = Path(__file__).resolve().parent
 DMD2_SCHEDULE = (0.999, 0.749, 0.499, 0.249)
@@ -277,7 +278,7 @@ def initialize_copy(teacher: FullCFGMLP, width: int, levels: int,
 @torch.inference_mode()
 def generate_pairs(teacher: nn.Module, n: int, scale: float, steps: int,
                    geometry: Geometry, device: str | torch.device, seed: int,
-                   chunk: int = 2048) -> dict:
+                   chunk: int = 2048, probs=None) -> dict:
     """Pregenerate (z, y) with y = guided teacher Heun output from z (DMD1)."""
     if n < 1 or steps < 1:
         raise ValueError("Pair count and solver steps must be positive")
@@ -286,7 +287,7 @@ def generate_pairs(teacher: nn.Module, n: int, scale: float, steps: int,
     for start in range(0, n, chunk):
         m = min(chunk, n - start)
         z = torch.randn((m, 2), device=device, generator=gen)
-        _, ids, _ = sample_data(m, geometry, gen, device)
+        _, ids, _ = sample_data(m, geometry, gen, device, probs=probs)
         c = encode_groups(ids)
         y = sample_depth(teacher, z, steps, scale, c)
         zs.append(z.cpu().numpy())
@@ -331,11 +332,12 @@ def arm_folder(root: Path, method: str, mode: str, scale: float) -> Path:
 @torch.inference_mode()
 def probe_sw1(student: nn.Module, schedule: tuple[float, ...], geometry: Geometry,
               probe_noise: torch.Tensor, probe_targets: np.ndarray,
-              directions: np.ndarray, rng_seed: int) -> float:
+              directions: np.ndarray, rng_seed: int, class_weights=None) -> float:
     """Cheap 4-step sample-quality probe: average per-class SW1 vs fixed targets.
 
     Renoise draws come from a freshly seeded generator so every probe is
-    directly comparable across training steps."""
+    directly comparable across training steps. ``class_weights`` makes the
+    probe reflect the run's class prior instead of a uniform average."""
     gen = make_generator(probe_noise.device, rng_seed)
     c = encode_groups(torch.arange(8, device=probe_noise.device)
                       .repeat_interleave(len(probe_noise)))
@@ -345,7 +347,11 @@ def probe_sw1(student: nn.Module, schedule: tuple[float, ...], geometry: Geometr
         sample = x0s[-1].reshape(8, -1, 2)[g].cpu().double().numpy()
         values.append(distribution_metrics(sample, probe_targets[g], g, geometry,
                                            directions)["sliced_wasserstein_1"])
-    return float(np.mean(values))
+    if class_weights is None:
+        return float(np.mean(values))
+    weights = np.asarray(class_weights, dtype=np.float64)
+    weights = weights / weights.sum()
+    return float(np.dot(weights, values))
 
 
 def train_arm(args, folder: Path, device: torch.device, seed: int, method: str,
@@ -356,6 +362,7 @@ def train_arm(args, folder: Path, device: torch.device, seed: int, method: str,
     teacher_record = source_teacher(args, folder)
     teacher, teacher_cfg = load_teacher(folder, device, args)
     teacher_digest = state_digest(teacher)
+    probs = class_probs_from_config(teacher_cfg)
 
     student = initialize_copy(teacher, args.width, args.levels, device)
     fake = initialize_copy(teacher, args.width, args.levels, device)
@@ -366,7 +373,7 @@ def train_arm(args, folder: Path, device: torch.device, seed: int, method: str,
     pairs = None
     if method == "dmd1":
         raw = generate_pairs(teacher, args.pairs, scale, args.pair_steps, geometry,
-                             device, seed + 101, chunk=args.batch_size)
+                             device, seed + 101, chunk=args.batch_size, probs=probs)
         save_pairs(folder, raw)
         pairs = load_pairs(folder, device, scale, args.pair_steps, args.pairs)
         pairs["z"] = pairs["z"].float()
@@ -389,19 +396,21 @@ def train_arm(args, folder: Path, device: torch.device, seed: int, method: str,
                         schedule, {"fake_ratio": fake_ratio,
                                    "generator_initial_state_sha256": initial_digest,
                                    "fake_initial_state_sha256": state_digest(fake),
+                                   "class_probs": probs,
                                    "pairs": None if pairs is None else
                                    {"count": args.pairs, "steps": args.pair_steps,
                                     "scale": scale}})
     save_json(folder / "config.json", config)
 
     history = [{"step": 0, "probe_sw1": probe_sw1(student, schedule, geometry, probe_noise,
-                                                  probe_targets, probe_dirs, seed + 106)}]
+                                                  probe_targets, probe_dirs, seed + 106,
+                                                  class_weights=probs)}]
     running = {}
     start = time.perf_counter()
     for step in range(1, args.gen_updates + 1):
         # ---- generator step -------------------------------------------------
         z = torch.randn((args.batch_size, 2), device=device, generator=gen_rng)
-        ids = torch.randint(8, (args.batch_size,), device=device, generator=gen_rng)
+        ids = sample_groups(args.batch_size, gen_rng, device, probs)
         c = encode_groups(ids)
         if method == "dmd2":
             k = int(torch.randint(len(schedule), (1,), device=device,
@@ -467,7 +476,8 @@ def train_arm(args, folder: Path, device: torch.device, seed: int, method: str,
                     record[key] = running[key] / (step % args.log_every or args.log_every)
             if step % args.probe_every == 0 or step == args.gen_updates:
                 record["probe_sw1"] = probe_sw1(student, schedule, geometry, probe_noise,
-                                                probe_targets, probe_dirs, seed + 106)
+                                                probe_targets, probe_dirs, seed + 106,
+                                                class_weights=probs)
             history.append(record)
             save_json(folder / "history.json", history)
             extra = f" reg={record['regression_loss']:.4f}" if "regression_loss" in record else ""
@@ -578,17 +588,22 @@ def student_trajectory(student: nn.Module, noise: torch.Tensor, c: torch.Tensor,
     return x0s, states, final
 
 
-def build_controls(args, geometry: Geometry, evaluation: Path) -> dict:
+def build_controls(args, geometry: Geometry, evaluation: Path, probs=None) -> dict:
     """Shared evaluation controls: matched noise, per-class targets, calibration."""
     path = evaluation / "controls.npz"
     if path.exists():
-        return load_controls(path)
+        controls = load_controls(path)
+        stored = controls.get("class_probs")
+        if (stored or None) != (list(probs) if probs is not None else None):
+            print(f"Ignoring {path}: class prior changed", flush=True)
+        else:
+            return controls
     cpu_gen = make_generator("cpu", args.eval_seed)
     noise = torch.randn((args.eval_samples, 2), generator=cpu_gen).numpy()
     refs = np.stack([sample_data(args.eval_samples, geometry, cpu_gen, group=g)[0]
                      .double().numpy() for g in range(8)])
-    calibration = sample_data(100000, geometry, cpu_gen)[0].double().numpy()
-    logs, _ = mixture_diagnostics(calibration, geometry)
+    calibration = sample_data(100000, geometry, cpu_gen, probs=probs)[0].double().numpy()
+    logs, _ = mixture_diagnostics(calibration, geometry, probs)
     thresholds = {"50": float(np.quantile(logs, .5)), "90": float(np.quantile(logs, .1))}
     directions = np.random.default_rng(args.eval_seed + 2).normal(size=(64, 2))
     directions /= np.linalg.norm(directions, axis=1, keepdims=True)
@@ -597,9 +612,11 @@ def build_controls(args, geometry: Geometry, evaluation: Path) -> dict:
     bounds = target_view_bounds(refs.reshape(-1, 2))
     np.savez_compressed(path, initial_noise=noise, refs=refs, calibration=calibration,
                         directions=directions, overlay=overlay,
-                        bounds=np.asarray(bounds), eval_seed=np.int64(args.eval_seed))
+                        bounds=np.asarray(bounds), eval_seed=np.int64(args.eval_seed),
+                        class_probs=np.asarray(probs if probs is not None else []))
     return {"initial_noise": noise, "refs": refs, "directions": directions,
-            "overlay": overlay, "bounds": bounds, "thresholds": thresholds}
+            "overlay": overlay, "bounds": bounds, "thresholds": thresholds,
+            "class_probs": list(probs) if probs is not None else None}
 
 
 def load_controls(path: Path) -> dict:
@@ -607,18 +624,31 @@ def load_controls(path: Path) -> dict:
     with np.load(path, allow_pickle=False) as archive:
         controls = {k: archive[k] for k in archive.files}
     calibration = controls.pop("calibration")
-    logs, _ = mixture_diagnostics(calibration, geometry)
+    probs = controls.pop("class_probs", None)
+    weights = None if probs is None or probs.size == 0 \
+        else [float(value) for value in probs]
+    logs, _ = mixture_diagnostics(calibration, geometry, weights)
     controls["thresholds"] = {"50": float(np.quantile(logs, .5)),
                               "90": float(np.quantile(logs, .1))}
     controls["bounds"] = tuple(controls["bounds"].tolist())
+    controls["class_probs"] = weights
     return controls
 
 
 def measure_grid(x: np.ndarray, refs: np.ndarray, geometry: Geometry,
-                 directions: np.ndarray) -> dict:
+                 directions: np.ndarray, class_weights=None) -> dict:
     """Per-class conditional metrics for an (8, n, 2) sample grid."""
     rows = [conditional_metrics(x[g], refs[g], g, geometry, directions) for g in range(8)]
-    return {"by_class": rows, "average": average_classes(rows)}
+    result = {"by_class": rows, "average": average_classes(rows)}
+    if class_weights is not None:
+        result["weighted_average"] = average_classes(rows, class_weights)
+        result["class_weights"] = [float(value) for value in class_weights]
+    return result
+
+
+def metric_average(block: dict) -> dict:
+    """Prefer the class-prior-weighted average when the run has one."""
+    return block.get("weighted_average", block["average"])
 
 
 def evaluate_arm(args, folder: Path, evaluation: Path, controls: dict, seed: int,
@@ -665,17 +695,22 @@ def evaluate_arm(args, folder: Path, evaluation: Path, controls: dict, seed: int
     student_states = np.stack([grid(state) for _, state in states])
     teacher_fine_g, teacher_w1_g, final_g = grid(teacher_fine), grid(teacher_w1), grid(final)
     refs, directions = controls["refs"], controls["directions"]
+    class_weights = controls.get("class_probs")
     coarse40 = teacher_states[-1]
     records = {
         "seed": seed, "method": method, "mode": mode, "scale": scale,
         "schedule": list(schedule), "capture_steps": list(capture), **digest,
-        "student": {"metrics": measure_grid(final_g, refs, geometry, directions)},
-        "teacher_heun40": {"metrics": measure_grid(coarse40, refs, geometry, directions)},
+        "class_probs": class_weights,
+        "student": {"metrics": measure_grid(final_g, refs, geometry, directions,
+                                            class_weights)},
+        "teacher_heun40": {"metrics": measure_grid(coarse40, refs, geometry, directions,
+                                                   class_weights)},
         "teacher_heun256": {"metrics": measure_grid(teacher_fine_g, refs, geometry,
-                                                    directions)},
+                                                    directions, class_weights)},
         "teacher_w1_heun256_context": {"metrics": measure_grid(teacher_w1_g, refs, geometry,
-                                                               directions)},
-        "target_control": {"metrics": measure_grid(refs, refs, geometry, directions)},
+                                                               directions, class_weights)},
+        "target_control": {"metrics": measure_grid(refs, refs, geometry, directions,
+                                                   class_weights)},
         "solver_checks": {},
         "renoise_redraw_rmse": float(np.sqrt(((final_g - grid(final_redraw)) ** 2).mean())),
         "caveat": "Student renoise states use fresh noise per step (DMD2 inference); "
@@ -683,7 +718,7 @@ def evaluate_arm(args, folder: Path, evaluation: Path, controls: dict, seed: int
                   "renoise draws.",
     }
     for name in ("student", "teacher_heun40", "teacher_heun256"):
-        average = records[name]["metrics"]["average"]
+        average = metric_average(records[name]["metrics"])
         print(f"eval {method}_{mode} w={scale:g} {name}: "
               f"SW1={average['sliced_wasserstein_1']:.5f} "
               f"HDR50={average['hdr_50_mass']:.3%} "
@@ -696,10 +731,12 @@ def evaluate_arm(args, folder: Path, evaluation: Path, controls: dict, seed: int
         "rmse": float(np.sqrt(((fine80 - coarse40[:, :check]) ** 2).mean()))}
     records["mixture"] = {
         "student": describe_samples(final_g.reshape(-1, 2), refs.reshape(-1, 2), geometry,
-                                    directions, controls["thresholds"]),
+                                    directions, controls["thresholds"],
+                                    controls["class_probs"]),
         "teacher_heun256": describe_samples(teacher_fine_g.reshape(-1, 2),
                                             refs.reshape(-1, 2), geometry, directions,
-                                            controls["thresholds"])}
+                                            controls["thresholds"],
+                                            controls["class_probs"])}
     np.savez_compressed(out / "samples.npz",
                         initial_noise=noise.repeat(8, 1).reshape(8, n, 2).cpu().double()
                         .numpy(),
@@ -824,18 +861,30 @@ def summarize(args, evaluation: Path, records: list, arms: list) -> dict:
         "distribution is the guided (biased) one, not the exact target."]}
     for record in records:
         name = f"{record['method']}_{record['mode']}_w{record['scale']:g}"
+        student = metric_average(record["student"]["metrics"])
+        student_uniform = record["student"]["metrics"]["average"]
+        teacher = metric_average(record["teacher_heun256"]["metrics"])
         summary["per_arm"][name] = {
-            "student_sw1": record["student"]["metrics"]["average"]["sliced_wasserstein_1"],
-            "teacher256_sw1":
-                record["teacher_heun256"]["metrics"]["average"]["sliced_wasserstein_1"],
-            "student_hdr50": record["student"]["metrics"]["average"]["hdr_50_mass"],
-            "student_inverse_mean_error":
-                record["student"]["metrics"]["average"]["inverse_mean_error"],
+            "student_sw1": student["sliced_wasserstein_1"],
+            "student_sw1_uniform": student_uniform["sliced_wasserstein_1"],
+            "teacher256_sw1": teacher["sliced_wasserstein_1"],
+            "student_hdr50": student["hdr_50_mass"],
+            "student_inverse_mean_error": student["inverse_mean_error"],
             "renoise_redraw_rmse": record["renoise_redraw_rmse"],
             "solver_teacher40_vs_80":
                 record["solver_checks"]["teacher_heun40_vs_80"]["rmse"]}
     save_json(evaluation / "summary.json", summary)
     return summary
+
+
+def teacher_class_probs(args) -> list[float] | None:
+    """Resolve the class prior recorded by the teacher that this run distills."""
+    source = ROOT / "runs" / args.teacher_run / f"seed{args.teacher_seed}"
+    if not source.exists():  # train_flow.py writes runs/<name>/ directly
+        source = ROOT / "runs" / args.teacher_run
+    checkpoint = torch.load(source / "checkpoint.pt", map_location="cpu",
+                            weights_only=True)
+    return class_probs_from_config(checkpoint["config"])
 
 
 def main(argv=None):
@@ -885,6 +934,8 @@ def main(argv=None):
     root.mkdir(parents=True, exist_ok=True)
     arms = [(m, mode, w) for m in args.methods for mode in args.modes for w in args.scales]
     schedule = validate_schedule(args.schedule)
+    probs = teacher_class_probs(args)
+    args.class_probs = probs
 
     if args.stage in ("all", "train"):
         for method, mode, scale in arms:
@@ -897,7 +948,7 @@ def main(argv=None):
             f"_seed{args.eval_seed}"
         if args.stage in ("all", "evaluate"):
             evaluation.mkdir(exist_ok=True)
-        controls = build_controls(args, geometry, evaluation)
+        controls = build_controls(args, geometry, evaluation, probs)
         if args.stage in ("all", "evaluate"):
             records = []
             for method, mode, scale in arms:

@@ -26,18 +26,20 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 
-from core import (FullCFGMLP, GROUPS, Geometry, describe_samples, encode_groups,
-                  flow_path, make_generator, measure_grid, mixture_diagnostics,
-                  sample_data, sample_depth, sample_times, save_json, setup_device,
+from core import (FullCFGMLP, GROUPS, Geometry, class_probs_from_config,
+                  describe_samples, draw_class_probs, encode_groups, flow_path,
+                  make_generator, measure_grid, mixture_diagnostics, sample_data,
+                  sample_depth, sample_times, save_json, setup_device,
                   target_view_bounds)
 
 ROOT = Path(__file__).resolve().parent
 
 
 @torch.inference_mode()
-def validate(model, geometry: Geometry, device, seed: int, n: int = 8192) -> dict:
+def validate(model, geometry: Geometry, device, seed: int, probs=None,
+             n: int = 8192) -> dict:
     gen = make_generator(device, seed)
-    data, ids, _ = sample_data(n, geometry, gen, device)
+    data, ids, _ = sample_data(n, geometry, gen, device, probs=probs)
     c = encode_groups(ids)
     noise = torch.randn(data.shape, device=device, generator=gen)
     t = sample_times(n, gen, device)
@@ -63,6 +65,7 @@ def train(args, folder: Path, device: torch.device, geometry: Geometry) -> None:
     model = FullCFGMLP(args.width, args.levels).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=0.0)
     gen = make_generator(device, args.seed + 1)
+    probs = draw_class_probs(args.class_alpha, args.class_seed, args.class_floor)
 
     # Fixed-count IID split: same recipe as the original CFG teacher.
     full_count = round(args.batch_size * (1 - args.class_dropout))
@@ -70,6 +73,7 @@ def train(args, folder: Path, device: torch.device, geometry: Geometry) -> None:
     config = {
         "arguments": {**vars(args), "guidance": "cfg", "class_conditional": True},
         "seed": args.seed, "geometry": asdict(geometry),
+        "class_probs": probs,
         "architecture": "stem 4->W; full NestedMiddle(levels) on BOTH branches; "
                         "concat(stem,middle)->W->2",
         "parameters_total": sum(p.numel() for p in model.parameters()),
@@ -79,11 +83,12 @@ def train(args, folder: Path, device: torch.device, geometry: Geometry) -> None:
         "gpu": torch.cuda.get_device_name(device) if device.type == "cuda" else None}
     save_json(folder / "config.json", config)
 
-    history = [{"step": 0, "validation": validate(model, geometry, device, args.seed + 2)}]
+    history = [{"step": 0,
+                "validation": validate(model, geometry, device, args.seed + 2, probs)}]
     start = time.perf_counter()
     running = torch.zeros(2, device=device)
     for step in range(1, args.train_steps + 1):
-        data, ids, _ = sample_data(args.batch_size, geometry, gen, device)
+        data, ids, _ = sample_data(args.batch_size, geometry, gen, device, probs=probs)
         c = encode_groups(ids)
         noise = torch.randn(data.shape, device=device, generator=gen)
         t = sample_times(len(data), gen, device)
@@ -101,7 +106,7 @@ def train(args, folder: Path, device: torch.device, geometry: Geometry) -> None:
         running += torch.stack((weak_loss.detach(), full_loss.detach()))
         if step % args.log_every == 0 or step == args.train_steps:
             count = step % args.log_every or args.log_every
-            val = validate(model, geometry, device, args.seed + 2)
+            val = validate(model, geometry, device, args.seed + 2, probs)
             record = {"step": step,
                       "train_unconditional_mse": (running[0] / count).item(),
                       "train_conditional_mse": (running[1] / count).item(),
@@ -141,6 +146,7 @@ def evaluate(args, folder: Path, device: torch.device, geometry: Geometry) -> di
                                          cfg["arguments"]["levels"]).to(device)
     model.load_state_dict(checkpoint["model"])
     model.eval()
+    probs = class_probs_from_config(cfg)
 
     n = args.eval_samples
     gen = make_generator(device, args.seed + 10)
@@ -150,10 +156,10 @@ def evaluate(args, folder: Path, device: torch.device, geometry: Geometry) -> di
     cpu_gen = make_generator("cpu", args.seed + 11)
     refs = np.stack([sample_data(n, geometry, cpu_gen, group=g)[0].double().numpy()
                      for g in range(GROUPS)])
-    calibration = sample_data(100000, geometry, cpu_gen)[0].double().numpy()
+    calibration = sample_data(100000, geometry, cpu_gen, probs=probs)[0].double().numpy()
     overlay = sample_data(40000, geometry, make_generator("cpu", args.seed + 12))[0] \
         .double().numpy()
-    logs, _ = mixture_diagnostics(calibration, geometry)
+    logs, _ = mixture_diagnostics(calibration, geometry, probs)
     thresholds = {"50": float(np.quantile(logs, .5)), "90": float(np.quantile(logs, .1))}
     directions = np.random.default_rng(args.seed + 13).normal(size=(64, 2))
     directions /= np.linalg.norm(directions, axis=1, keepdims=True)
@@ -162,13 +168,14 @@ def evaluate(args, folder: Path, device: torch.device, geometry: Geometry) -> di
     samples = {scale: sample_depth(model, noise, args.steps, scale, c)
                .reshape(GROUPS, n, 2).cpu().double().numpy() for scale in scales}
     metrics = {"seed": args.seed, "steps": args.steps, "samples_per_class": n,
-               "scales": {}}
+               "class_probs": probs, "scales": {}}
     for scale in scales:
         metrics["scales"][f"{scale:g}"] = {
-            "vs_target": measure_grid(samples[scale], refs, geometry, directions),
+            "vs_target": measure_grid(samples[scale], refs, geometry, directions,
+                                      class_weights=probs),
             "mixture": describe_samples(samples[scale].reshape(-1, 2),
                                         refs.reshape(-1, 2), geometry, directions,
-                                        thresholds)}
+                                        thresholds, probs)}
     save_json(folder / "teacher_metrics.json", metrics)
 
     colors = plt.get_cmap("tab10")(np.arange(GROUPS))
@@ -185,10 +192,12 @@ def evaluate(args, folder: Path, device: torch.device, geometry: Geometry) -> di
         ax.set(title=title, xlim=(lo[0], hi[0]), ylim=(lo[1], hi[1]),
                aspect="equal", xlabel="x", ylabel="y" if ax is axs[0, 0] else "")
     for scale in scales:
-        row = metrics["scales"][f"{scale:g}"]["vs_target"]["average"]
+        block = metrics["scales"][f"{scale:g}"]["vs_target"]
+        row = block.get("weighted_average", block["average"])
+        label = "SW1w" if "weighted_average" in block else "SW1"
         axs[0][list(scales).index(scale) + 1].text(
-            .03, .03, f"SW1 {row['sliced_wasserstein_1']:.4f}", transform=axs[0][
-                list(scales).index(scale) + 1].transAxes, fontsize=8,
+            .03, .03, f"{label} {row['sliced_wasserstein_1']:.4f}",
+            transform=axs[0][list(scales).index(scale) + 1].transAxes, fontsize=8,
             bbox={"facecolor": "white", "alpha": .8, "edgecolor": "none"})
     fig.suptitle(f"Spiral CFG flow-matching teacher · seed {args.seed} · "
                  f"Heun-{args.steps} · near-origin spiral underlay", fontsize=11)
@@ -212,12 +221,20 @@ def main(argv=None):
     parser.add_argument("--batch-size", type=int, default=2048)
     parser.add_argument("--lr", type=float, default=0.001)
     parser.add_argument("--class-dropout", type=float, default=0.1)
+    parser.add_argument("--class-alpha", type=float, default=0.0,
+                        help="Dirichlet concentration for the class prior; 0 = balanced")
+    parser.add_argument("--class-seed", type=int, default=0,
+                        help="Seed for the random class prior (independent of --seed)")
+    parser.add_argument("--class-floor", type=float, default=0.02,
+                        help="Minimum class probability before renormalization")
     parser.add_argument("--log-every", type=int, default=1000)
     parser.add_argument("--eval-samples", type=int, default=4096)
     parser.add_argument("--steps", type=int, default=256)
     args = parser.parse_args(argv)
     if not 0 <= args.class_dropout < 1:
         raise SystemExit("class-dropout must lie in [0,1)")
+    if args.class_alpha < 0 or not 0 <= args.class_floor < 1 / GROUPS:
+        raise SystemExit("class-alpha must be >= 0 and class-floor in [0, 1/8)")
     device = setup_device(args.device)
     geometry = Geometry()
     folder = ROOT / "runs" / args.run_name

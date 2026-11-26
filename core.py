@@ -63,15 +63,65 @@ def encode_groups(groups: torch.Tensor) -> torch.Tensor:
     return groups.to(torch.float32).unsqueeze(-1) / (GROUPS - 1)
 
 
+def draw_class_probs(alpha: float, seed: int, floor: float = 0.02) -> list[float]:
+    """Draw a random class prior from Dirichlet(alpha) with a per-class floor.
+
+    ``alpha == 0`` is the balanced control. The prior is deterministic in
+    ``seed`` and independent of torch/device RNG state. The floor is applied
+    before the final normalization, so every class remains reachable.
+    """
+    if not math.isfinite(alpha) or alpha < 0:
+        raise ValueError("Class alpha must be finite and nonnegative")
+    if not math.isfinite(floor) or not 0 <= floor < 1 / GROUPS:
+        raise ValueError(f"Class floor must lie in [0, {1 / GROUPS})")
+    if alpha == 0:
+        return [1 / GROUPS] * GROUPS
+    weights = np.random.default_rng(seed).dirichlet(np.full(GROUPS, alpha))
+    weights = np.maximum(weights, floor)
+    weights /= weights.sum()
+    return [float(value) for value in weights]
+
+
+def class_probs_from_config(config: dict) -> list[float] | None:
+    """Read a resolved class prior from a teacher config; ``None`` = balanced."""
+    probs = config.get("class_probs")
+    if probs is None:
+        probs = config.get("arguments", {}).get("class_probs")
+    if probs is None:
+        return None
+    values = [float(value) for value in probs]
+    if len(values) != GROUPS or any(not math.isfinite(v) or v <= 0 for v in values):
+        raise ValueError(f"class_probs must contain {GROUPS} positive finite values")
+    total = sum(values)
+    return [value / total for value in values]
+
+
+def sample_groups(n: int, generator: torch.Generator, device: str | torch.device,
+                  probs: list[float] | tuple[float, ...] | None = None
+                  ) -> torch.Tensor:
+    """Draw class ids uniformly or from a fixed class prior."""
+    if n <= 0:
+        raise ValueError("Sample count must be positive")
+    if probs is None:
+        return torch.randint(GROUPS, (n,), device=device, generator=generator)
+    if len(probs) != GROUPS:
+        raise ValueError(f"Class prior must have {GROUPS} entries")
+    weights = torch.as_tensor(probs, dtype=torch.float32, device=device)
+    return torch.multinomial(weights, n, replacement=True, generator=generator)
+
+
 def sample_data(n: int, geometry: Geometry, generator: torch.Generator,
-                device: str | torch.device = "cpu", group: int | None = None
+                device: str | torch.device = "cpu", group: int | None = None,
+                probs: list[float] | tuple[float, ...] | None = None
                 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     if n <= 0:
         raise ValueError("Sample count must be positive")
     if group is not None and (type(group) is not int or not 0 <= group < GROUPS):
         raise ValueError(f"Group must be an integer in 0..{GROUPS - 1}")
-    groups = (torch.randint(GROUPS, (n,), device=device, generator=generator)
-              if group is None else torch.full((n,), group, device=device, dtype=torch.long))
+    if group is not None and probs is not None:
+        raise ValueError("Pass either a fixed group or a class prior, not both")
+    groups = (torch.full((n,), group, device=device, dtype=torch.long)
+              if group is not None else sample_groups(n, generator, device, probs))
     local = torch.randn((n, 2), device=device, generator=generator)
     local = local * local.new_tensor([geometry.radial_std, geometry.tangential_std])
     local[:, 0] += geometry.radius
@@ -273,12 +323,19 @@ def distribution_metrics(samples: np.ndarray, target: np.ndarray, group: int,
             "radius_99": float(np.quantile(np.linalg.norm(samples, axis=1), 0.99))}
 
 
-def mixture_diagnostics(x, geometry: Geometry):
+def mixture_diagnostics(x, geometry: Geometry, class_probs=None):
     points = torch.as_tensor(x, dtype=torch.float64)
     logs = torch.stack([log_density(points, torch.full((len(points),), g,
                                                        dtype=torch.long), geometry)
                         for g in range(GROUPS)], dim=-1)
-    return (logs.logsumexp(-1) - math.log(GROUPS)).numpy(), logs.argmax(-1).numpy()
+    if class_probs is None:
+        prior = -math.log(GROUPS)
+    else:
+        weights = torch.as_tensor(class_probs, dtype=logs.dtype)
+        weights = weights / weights.sum()
+        prior = torch.log(weights)
+    joint = logs + prior
+    return joint.logsumexp(-1).numpy(), joint.argmax(-1).numpy()
 
 
 def sw1(x, ref, directions) -> float:
@@ -305,21 +362,35 @@ def conditional_metrics(x, ref, group, geometry: Geometry, directions) -> dict:
     return row
 
 
-def average_classes(rows) -> dict:
-    return {key: float(np.mean([r[key] for r in rows])) for key in CONDITIONAL_KEYS}
+def average_classes(rows, weights=None) -> dict:
+    """Average per-class metrics uniformly or under a class prior."""
+    if weights is None:
+        return {key: float(np.mean([r[key] for r in rows])) for key in CONDITIONAL_KEYS}
+    values = np.asarray(weights, dtype=np.float64)
+    if values.shape != (len(rows),) or not np.all(np.isfinite(values)) \
+            or np.any(values < 0) or values.sum() <= 0:
+        raise ValueError("Class weights must be nonnegative and match the rows")
+    values = values / values.sum()
+    return {key: float(np.dot(values, [r[key] for r in rows]))
+            for key in CONDITIONAL_KEYS}
 
 
 def measure_grid(x: np.ndarray, refs: np.ndarray, geometry: Geometry,
-                 directions: np.ndarray) -> dict:
+                 directions: np.ndarray, class_weights=None) -> dict:
     """Per-class conditional metrics for an (8, n, 2) sample grid."""
     rows = [conditional_metrics(x[g], refs[g], g, geometry, directions)
             for g in range(GROUPS)]
-    return {"by_class": rows, "average": average_classes(rows)}
+    result = {"by_class": rows, "average": average_classes(rows)}
+    if class_weights is not None:
+        result["weighted_average"] = average_classes(rows, class_weights)
+        result["class_weights"] = [float(value) for value in class_weights]
+    return result
 
 
-def describe_samples(x, ref, geometry: Geometry, directions, thresholds) -> dict:
-    logp, ids = mixture_diagnostics(x, geometry)
-    _, ref_ids = mixture_diagnostics(ref, geometry)
+def describe_samples(x, ref, geometry: Geometry, directions, thresholds,
+                     class_probs=None) -> dict:
+    logp, ids = mixture_diagnostics(x, geometry, class_probs)
+    _, ref_ids = mixture_diagnostics(ref, geometry, class_probs)
     groups = []
     for g in range(GROUPS):
         local, local_ref = x[ids == g], ref[ref_ids == g]

@@ -39,10 +39,10 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-from core import (GROUPS, FullCFGMLP, Geometry, depth_velocity, describe_samples,
-                  encode_groups, make_generator, measure_grid, mixture_diagnostics,
-                  sample_data, sample_depth, save_json, setup_device, state_digest,
-                  target_view_bounds)
+from core import (GROUPS, FullCFGMLP, Geometry, class_probs_from_config, depth_velocity,
+                  describe_samples, encode_groups, make_generator, measure_grid,
+                  mixture_diagnostics, sample_data, sample_depth, sample_groups,
+                  save_json, setup_device, state_digest, target_view_bounds)
 
 ROOT = Path(__file__).resolve().parent
 METHOD = "pdd"
@@ -274,8 +274,9 @@ class DataFreeCarry:
     """Carry one student trajectory across updates; advance by block_min, stop-grad."""
 
     def __init__(self, batch: int, grid: PDDGrid, device: torch.device,
-                 generator: torch.Generator):
+                 generator: torch.Generator, probs=None):
         self.batch, self.grid, self.device, self.generator = batch, grid, device, generator
+        self.probs = probs
         self.x: torch.Tensor | None = None
         self.c: torch.Tensor | None = None
         self.position: int | None = None
@@ -283,8 +284,7 @@ class DataFreeCarry:
     def reset(self) -> None:
         self.x = torch.randn((self.batch, 2), device=self.device,
                              generator=self.generator)
-        ids = torch.randint(GROUPS, (self.batch,), device=self.device,
-                            generator=self.generator)
+        ids = sample_groups(self.batch, self.generator, self.device, self.probs)
         self.c = encode_groups(ids)
         self.position = 0
 
@@ -327,10 +327,10 @@ def load_teacher(folder: Path, device: torch.device, width: int, levels: int):
 
 def train_step(args, student: PDDStudent, teacher: nn.Module, grid: PDDGrid,
                optimizer: torch.optim.Optimizer, generator: torch.Generator,
-               geometry: Geometry, carry: DataFreeCarry | None):
+               geometry: Geometry, carry: DataFreeCarry | None, probs=None):
     batch = args.batch_size
     if carry is None:
-        data, ids, _ = sample_data(batch, geometry, generator, args.device)
+        data, ids, _ = sample_data(batch, geometry, generator, args.device, probs=probs)
         c = encode_groups(ids)
         noise = torch.randn(data.shape, device=args.device, generator=generator)
         slot = torch.randint(grid.num_starts, (batch,), device=args.device,
@@ -363,10 +363,11 @@ def train_step(args, student: PDDStudent, teacher: nn.Module, grid: PDDGrid,
 @torch.inference_mode()
 def probe_metrics(student: PDDStudent, grid: PDDGrid, noise: torch.Tensor,
                   c: torch.Tensor, refs: np.ndarray, directions: np.ndarray,
-                  geometry: Geometry, nfe: int) -> dict:
+                  geometry: Geometry, nfe: int, class_weights=None) -> dict:
     samples = sample_pdd(student, noise, c, grid, nfe)
     samples = samples.reshape(GROUPS, -1, 2).cpu().double().numpy()
-    return measure_grid(samples, refs, geometry, directions)["average"]
+    metrics = measure_grid(samples, refs, geometry, directions, class_weights)
+    return metrics.get("weighted_average", metrics["average"])
 
 
 def train_arm(args, folder: Path, teacher: nn.Module, teacher_checkpoint: dict,
@@ -386,7 +387,8 @@ def train_arm(args, folder: Path, teacher: nn.Module, teacher_checkpoint: dict,
 
     optimizer = torch.optim.AdamW(student.parameters(), lr=args.lr, weight_decay=0.0)
     generator = make_generator(device, args.seed + 100)
-    carry = DataFreeCarry(args.batch_size, grid, device, generator) \
+    probs = class_probs_from_config(teacher_checkpoint["config"])
+    carry = DataFreeCarry(args.batch_size, grid, device, generator, probs=probs) \
         if args.data_free else None
 
     probe_generator = make_generator(device, args.seed + 103)
@@ -408,6 +410,7 @@ def train_arm(args, folder: Path, teacher: nn.Module, teacher_checkpoint: dict,
         "width": args.width, "levels": args.levels, "heads": args.heads,
         "data_free": args.data_free, "updates": args.updates,
         "batch_size": args.batch_size, "lr": args.lr, "grad_clip": args.grad_clip,
+        "class_probs": probs,
         "grid": {"steps": args.steps, "block_min": args.block_min,
                  "block_max": args.block_max, "shift": args.shift},
         "teacher_run": args.teacher_run,
@@ -422,12 +425,12 @@ def train_arm(args, folder: Path, teacher: nn.Module, teacher_checkpoint: dict,
     probe_nfe = 4 if args.steps % 4 == 0 else args.steps
     history = [{"step": 0, "probe": probe_metrics(student, grid, probe_noise, probe_c,
                                                   probe_refs, probe_directions,
-                                                  geometry, probe_nfe)}]
+                                                  geometry, probe_nfe, probs)}]
     running, count = 0.0, 0
     began = time.perf_counter()
     for step in range(1, args.updates + 1):
         loss, grad_norm = train_step(args, student, teacher, grid, optimizer, generator,
-                                     geometry, carry)
+                                     geometry, carry, probs)
         running += float(loss)
         count += 1
         if step % args.log_every == 0 or step == args.updates:
@@ -437,7 +440,7 @@ def train_arm(args, folder: Path, teacher: nn.Module, teacher_checkpoint: dict,
             if step % args.probe_every == 0 or step == args.updates:
                 record["probe"] = probe_metrics(student, grid, probe_noise, probe_c,
                                                 probe_refs, probe_directions,
-                                                geometry, probe_nfe)
+                                                geometry, probe_nfe, probs)
             history.append(record)
             save_json(folder / "history.json", history)
             probe = record.get("probe", {}).get("sliced_wasserstein_1")
@@ -488,39 +491,46 @@ def load_controls(path: Path) -> dict:
     with np.load(path, allow_pickle=False) as archive:
         controls = {key: archive[key] for key in archive.files}
     calibration = controls.pop("calibration")
-    logs, _ = mixture_diagnostics(calibration, geometry)
+    probs = controls.pop("class_probs", None)
+    weights = None if probs is None or probs.size == 0 \
+        else [float(value) for value in probs]
+    logs, _ = mixture_diagnostics(calibration, geometry, weights)
     controls["thresholds"] = {"50": float(np.quantile(logs, .5)),
                               "90": float(np.quantile(logs, .1))}
     controls["bounds"] = tuple(controls["bounds"].tolist())
+    controls["class_probs"] = weights
     return controls
 
 
-def build_controls(args, geometry: Geometry, evaluation: Path) -> dict:
+def build_controls(args, geometry: Geometry, evaluation: Path, probs=None) -> dict:
     path = evaluation / "controls.npz"
 
     def compatible(controls: dict) -> bool:
+        stored = controls.get("class_probs")
         return (controls["initial_noise"].shape == (args.eval_samples, 2)
-                and controls["refs"].shape == (GROUPS, args.eval_samples, 2))
+                and controls["refs"].shape == (GROUPS, args.eval_samples, 2)
+                and (stored or None) == (list(probs) if probs is not None else None))
 
     if path.exists():
         controls = load_controls(path)
         if compatible(controls):
             return controls
-        print(f"Ignoring {path}: sample-count mismatch", flush=True)
+        print(f"Ignoring {path}: sample-count or class-prior mismatch", flush=True)
     candidate = ROOT / "runs" / args.controls_from / "controls.npz"
     if args.controls_from and candidate.exists():
         controls = load_controls(candidate)
         if compatible(controls):
             print(f"Using matched DMD controls: {candidate}", flush=True)
             return controls
-        print(f"Ignoring {candidate}: sample-count mismatch; building fresh controls",
-              flush=True)
+        print(f"Ignoring {candidate}: sample-count or class-prior mismatch; "
+              "building fresh controls", flush=True)
     cpu_generator = make_generator("cpu", args.eval_seed)
     noise = torch.randn((args.eval_samples, 2), generator=cpu_generator).numpy()
     refs = np.stack([sample_data(args.eval_samples, geometry, cpu_generator, group=g)[0]
                      .double().numpy() for g in range(GROUPS)])
-    calibration = sample_data(100000, geometry, cpu_generator)[0].double().numpy()
-    logs, _ = mixture_diagnostics(calibration, geometry)
+    calibration = sample_data(100000, geometry, cpu_generator,
+                              probs=probs)[0].double().numpy()
+    logs, _ = mixture_diagnostics(calibration, geometry, probs)
     thresholds = {"50": float(np.quantile(logs, .5)),
                   "90": float(np.quantile(logs, .1))}
     directions = np.random.default_rng(args.eval_seed + 2).normal(size=(64, 2))
@@ -530,12 +540,14 @@ def build_controls(args, geometry: Geometry, evaluation: Path) -> dict:
     bounds = target_view_bounds(refs.reshape(-1, 2))
     np.savez_compressed(path, initial_noise=noise, refs=refs, calibration=calibration,
                         directions=directions, overlay=overlay,
-                        bounds=np.asarray(bounds), eval_seed=np.int64(args.eval_seed))
+                        bounds=np.asarray(bounds), eval_seed=np.int64(args.eval_seed),
+                        class_probs=np.asarray(probs if probs is not None else []))
     return {"initial_noise": noise, "refs": refs, "directions": directions,
-            "overlay": overlay, "bounds": bounds, "thresholds": thresholds}
+            "overlay": overlay, "bounds": bounds, "thresholds": thresholds,
+            "class_probs": list(probs) if probs is not None else None}
 
 
-def diversity_metrics(samples: np.ndarray, limit: int = 512) -> dict:
+def diversity_metrics(samples: np.ndarray, limit: int = 512, class_weights=None) -> dict:
     """Mean pairwise distance per requested class (subset for O(n^2))."""
     per_class = []
     for group in range(GROUPS):
@@ -545,17 +557,33 @@ def diversity_metrics(samples: np.ndarray, limit: int = 512) -> dict:
         distances = np.linalg.norm(local[:, None, :] - local[None, :, :], axis=-1)
         upper = np.triu_indices(len(local), 1)
         per_class.append(float(distances[upper].mean()))
-    return {"mean_pairwise_distance_by_class": per_class,
-            "mean_pairwise_distance": float(np.mean(per_class))}
+    result = {"mean_pairwise_distance_by_class": per_class,
+              "mean_pairwise_distance": float(np.mean(per_class))}
+    if class_weights is not None:
+        weights = np.asarray(class_weights, dtype=np.float64)
+        weights = weights / weights.sum()
+        result["mean_pairwise_distance_weighted"] = float(np.dot(weights, per_class))
+        result["class_weights"] = [float(value) for value in class_weights]
+    return result
 
 
-def distance_metrics(samples: np.ndarray, reference: np.ndarray) -> dict:
+def distance_metrics(samples: np.ndarray, reference: np.ndarray,
+                     class_weights=None) -> dict:
     """Per-sample trajectory agreement under shared initial noise."""
     difference = np.asarray(samples, dtype=np.float64) - np.asarray(reference,
                                                                      dtype=np.float64)
     flat = difference.reshape(-1, difference.shape[-1])
-    return {"rmse": float(np.sqrt(np.mean(difference ** 2))),
-            "mean_l2": float(np.linalg.norm(flat, axis=-1).mean())}
+    result = {"rmse": float(np.sqrt(np.mean(difference ** 2))),
+              "mean_l2": float(np.linalg.norm(flat, axis=-1).mean())}
+    if class_weights is not None:
+        per_class = [float(np.sqrt(np.mean(difference[group] ** 2)))
+                     for group in range(len(difference))]
+        weights = np.asarray(class_weights, dtype=np.float64)
+        weights = weights / weights.sum()
+        result["rmse_weighted"] = float(np.dot(weights, per_class))
+        result["rmse_by_class"] = per_class
+        result["class_weights"] = [float(value) for value in class_weights]
+    return result
 
 
 def sample_grid_figure(path: Path, panels: list, controls: dict, title: str,
@@ -596,10 +624,12 @@ def nfe_figure(path: Path, rows: list, teacher: dict, baseline_rmse: float,
               ("hdr_50_mass", "HDR50 mass"),
               ("inverse_mean_error", "Inverse mean error"))
     for ax, (key, label) in zip(axs, series):
-        ax.plot(nfes, [row["student"]["average"][key] for row in rows], ".-",
-                label="PDD")
-        ax.plot(nfes, [row["teacher_euler"]["average"][key] for row in rows], "s--",
-                alpha=.6, label="Teacher Euler, same NFE")
+        ax.plot(nfes, [row["student"].get("weighted_average",
+                                          row["student"]["average"])[key]
+                       for row in rows], ".-", label="PDD")
+        ax.plot(nfes, [row["teacher_euler"].get("weighted_average",
+                                                row["teacher_euler"]["average"])[key]
+                       for row in rows], "s--", alpha=.6, label="Teacher Euler, same NFE")
         if key in teacher:
             ax.axhline(teacher[key], linestyle=":", color="gray",
                        label=f"Teacher-256 {teacher[key]:.4f}")
@@ -631,11 +661,11 @@ def discover_arms(root: Path) -> list[Path]:
 
 
 def evaluate(args, root: Path, teacher: nn.Module, device: torch.device,
-             geometry: Geometry) -> dict:
+             geometry: Geometry, probs=None) -> dict:
     evaluation = root / f"evaluation_s{args.teacher_steps}_n{args.eval_samples}" \
         f"_seed{args.eval_seed}"
     evaluation.mkdir(parents=True, exist_ok=True)
-    controls = build_controls(args, geometry, evaluation)
+    controls = build_controls(args, geometry, evaluation, probs)
     refs, directions = controls["refs"], controls["directions"]
     n = args.eval_samples
     noise = torch.from_numpy(controls["initial_noise"]).to(device)
@@ -646,7 +676,8 @@ def evaluate(args, root: Path, teacher: nn.Module, device: torch.device,
     if not arms:
         raise SystemExit(f"No trained PDD arms under {root}")
     records = {"controls_from": args.controls_from, "eval_seed": args.eval_seed,
-               "eval_samples": n, "teacher_steps": args.teacher_steps, "arms": {}}
+               "eval_samples": n, "teacher_steps": args.teacher_steps,
+               "class_probs": probs, "arms": {}}
     teacher_cache: dict = {}
     sample_banks: dict = {}
     rows_for_summary = []
@@ -678,11 +709,13 @@ def evaluate(args, root: Path, teacher: nn.Module, device: torch.device,
                 "teacher_256": teacher_fine_np,
                 "teacher_grid": teacher_grid_np,
                 "teacher_256_metrics": measure_grid(teacher_fine_np, refs, geometry,
-                                                    directions),
+                                                    directions, probs),
                 "teacher_grid_metrics": measure_grid(teacher_grid_np, refs, geometry,
-                                                     directions),
-                "teacher_256_diversity": diversity_metrics(teacher_fine_np),
-                "teacher_grid_diversity": diversity_metrics(teacher_grid_np)}
+                                                     directions, probs),
+                "teacher_256_diversity": diversity_metrics(teacher_fine_np,
+                                                           class_weights=probs),
+                "teacher_grid_diversity": diversity_metrics(teacher_grid_np,
+                                                            class_weights=probs)}
         cache = teacher_cache[scale_key]
 
         sample_bank = {}
@@ -692,7 +725,7 @@ def evaluate(args, root: Path, teacher: nn.Module, device: torch.device,
                       "teacher_256_diversity": cache["teacher_256_diversity"],
                       "teacher_grid_diversity": cache["teacher_grid_diversity"],
                       "grid_rmse": distance_metrics(cache["teacher_grid"],
-                                                    cache["teacher_256"]),
+                                                    cache["teacher_256"], probs),
                       "nfe": {}}
         for nfe in args.eval_nfe:
             if steps % nfe != 0:
@@ -705,51 +738,65 @@ def evaluate(args, root: Path, teacher: nn.Module, device: torch.device,
                 teacher, noise8, c, PDDGrid(nfe, 1, nfe, 1.0, device), scale,
                 "euler")
             teacher_euler_np = teacher_euler.reshape(GROUPS, n, 2).cpu().double().numpy()
-            student_metrics = measure_grid(samples_np, refs, geometry, directions)
+            student_metrics = measure_grid(samples_np, refs, geometry, directions, probs)
             teacher_nfe_metrics = measure_grid(teacher_nfe_np, refs, geometry,
-                                               directions)
+                                               directions, probs)
             teacher_euler_metrics = measure_grid(teacher_euler_np, refs, geometry,
-                                                 directions)
+                                                 directions, probs)
             sample_bank[str(nfe)] = samples_np
             arm_record["nfe"][str(nfe)] = {
                 "student": student_metrics,
                 "teacher_nfe": teacher_nfe_metrics,
                 "teacher_euler": teacher_euler_metrics,
-                "diversity": diversity_metrics(samples_np),
-                "teacher_nfe_diversity": diversity_metrics(teacher_nfe_np),
-                "teacher_euler_diversity": diversity_metrics(teacher_euler_np),
+                "diversity": diversity_metrics(samples_np, class_weights=probs),
+                "teacher_nfe_diversity": diversity_metrics(teacher_nfe_np,
+                                                           class_weights=probs),
+                "teacher_euler_diversity": diversity_metrics(teacher_euler_np,
+                                                             class_weights=probs),
                 "to_teacher_grid": distance_metrics(samples_np,
-                                                    cache["teacher_grid"]),
-                "to_teacher_256": distance_metrics(samples_np, cache["teacher_256"]),
+                                                    cache["teacher_grid"], probs),
+                "to_teacher_256": distance_metrics(samples_np, cache["teacher_256"],
+                                                   probs),
                 "mixture": describe_samples(samples_np.reshape(-1, 2),
                                             refs.reshape(-1, 2), geometry,
-                                            directions, controls["thresholds"])}
-            average = student_metrics["average"]
+                                            directions, controls["thresholds"], probs)}
+            def avg(block):
+                return block.get("weighted_average", block["average"])
+            average = avg(student_metrics)
+            student_uniform = student_metrics["average"]
             row = {"arm": arm_name, "scale": scale, "rk": rk, "nfe": nfe,
                    "student_sw1": average["sliced_wasserstein_1"],
+                   "student_sw1_uniform": student_uniform["sliced_wasserstein_1"],
                    "student_hdr50": average["hdr_50_mass"],
                    "student_center": average["inverse_mean_error"],
-                   "teacher_nfe_sw1": teacher_nfe_metrics["average"][
+                   "teacher_nfe_sw1": avg(teacher_nfe_metrics)[
                        "sliced_wasserstein_1"],
-                   "teacher_euler_sw1": teacher_euler_metrics["average"][
+                   "teacher_euler_sw1": avg(teacher_euler_metrics)[
                        "sliced_wasserstein_1"],
-                   "teacher_256_sw1": cache["teacher_256_metrics"]["average"][
+                   "teacher_256_sw1": avg(cache["teacher_256_metrics"])[
                        "sliced_wasserstein_1"],
-                   "teacher_grid_sw1": cache["teacher_grid_metrics"]["average"][
+                   "teacher_grid_sw1": avg(cache["teacher_grid_metrics"])[
                        "sliced_wasserstein_1"],
                    "rmse_teacher_grid": arm_record["nfe"][str(nfe)][
-                       "to_teacher_grid"]["rmse"],
+                       "to_teacher_grid"].get("rmse_weighted", arm_record["nfe"][
+                           str(nfe)]["to_teacher_grid"]["rmse"]),
                    "rmse_teacher_256": arm_record["nfe"][str(nfe)][
-                       "to_teacher_256"]["rmse"],
+                       "to_teacher_256"].get("rmse_weighted", arm_record["nfe"][
+                           str(nfe)]["to_teacher_256"]["rmse"]),
                    "mean_l2_teacher_grid": arm_record["nfe"][str(nfe)][
                        "to_teacher_grid"]["mean_l2"],
-                   "teacher_grid_rmse": arm_record["grid_rmse"]["rmse"],
-                   "diversity": arm_record["nfe"][str(nfe)]["diversity"][
-                       "mean_pairwise_distance"],
-                   "teacher_grid_diversity": arm_record["teacher_grid_diversity"][
-                       "mean_pairwise_distance"],
-                   "teacher_256_diversity": arm_record["teacher_256_diversity"][
-                       "mean_pairwise_distance"]}
+                   "teacher_grid_rmse": arm_record["grid_rmse"].get(
+                       "rmse_weighted", arm_record["grid_rmse"]["rmse"]),
+                   "diversity": arm_record["nfe"][str(nfe)]["diversity"].get(
+                       "mean_pairwise_distance_weighted",
+                       arm_record["nfe"][str(nfe)]["diversity"][
+                           "mean_pairwise_distance"]),
+                   "teacher_grid_diversity": arm_record["teacher_grid_diversity"].get(
+                       "mean_pairwise_distance_weighted",
+                       arm_record["teacher_grid_diversity"]["mean_pairwise_distance"]),
+                   "teacher_256_diversity": arm_record["teacher_256_diversity"].get(
+                       "mean_pairwise_distance_weighted",
+                       arm_record["teacher_256_diversity"]["mean_pairwise_distance"])}
             rows_for_summary.append(row)
             print(f"  NFE={nfe}: SW1={row['student_sw1']:.5f} "
                   f"HDR50={row['student_hdr50']:.3%} "
@@ -768,7 +815,8 @@ def evaluate(args, root: Path, teacher: nn.Module, device: torch.device,
     save_json(evaluation / "summary.json", rows_for_summary)
 
     dmd_root = next(iter(sorted(
-        (ROOT / "runs" / "dmd").glob(f"evaluation_s*_n{n}_seed{args.eval_seed}"))),
+        (ROOT / "runs" / args.dmd_run_name).glob(
+            f"evaluation_s*_n{n}_seed{args.eval_seed}"))),
         None)
     if dmd_root is not None and dmd_root.exists():
         baselines = {}
@@ -776,13 +824,16 @@ def evaluate(args, root: Path, teacher: nn.Module, device: torch.device,
             with np.load(path, allow_pickle=False) as archive:
                 final = archive["student_final"]
                 teacher = archive["teacher_fine"]
-            metrics = measure_grid(final, refs, geometry, directions)
+            metrics = measure_grid(final, refs, geometry, directions, probs)
             baselines[path.parent.name] = {
-                "student_sw1": metrics["average"]["sliced_wasserstein_1"],
-                "student_hdr50": metrics["average"]["hdr_50_mass"],
-                "student_center": metrics["average"]["inverse_mean_error"],
-                "diversity": diversity_metrics(final),
-                "to_teacher": distance_metrics(final, teacher)}
+                "student_sw1": metrics.get("weighted_average",
+                                           metrics["average"])["sliced_wasserstein_1"],
+                "student_hdr50": metrics.get("weighted_average",
+                                             metrics["average"])["hdr_50_mass"],
+                "student_center": metrics.get("weighted_average",
+                                              metrics["average"])["inverse_mean_error"],
+                "diversity": diversity_metrics(final, class_weights=probs),
+                "to_teacher": distance_metrics(final, teacher, probs)}
         records["dmd_baselines"] = baselines
 
     # Figures: one per scale, using the midpoint arm and NFE 1/2/4/8.
@@ -804,14 +855,19 @@ def evaluate(args, root: Path, teacher: nn.Module, device: torch.device,
         panels = [
             ("Target", refs, None),
             (f"Teacher Heun-{args.teacher_steps}", cache["teacher_256"],
-             arm_record["teacher_256"]["average"]["sliced_wasserstein_1"]),
+             arm_record["teacher_256"].get(
+                 "weighted_average", arm_record["teacher_256"]["average"])[
+                     "sliced_wasserstein_1"]),
             (f"Teacher grid ({arm_record['config']['rk']}, N={steps})",
              cache["teacher_grid"],
-             arm_record["teacher_grid"]["average"]["sliced_wasserstein_1"])]
+             arm_record["teacher_grid"].get(
+                 "weighted_average", arm_record["teacher_grid"]["average"])[
+                     "sliced_wasserstein_1"])]
         display_nfes = [nfe for nfe in (1, 2, 4, 8) if str(nfe) in arm_record["nfe"]]
         for nfe in display_nfes:
+            block = arm_record["nfe"][str(nfe)]["student"]
             panels.append((f"PDD NFE={nfe}", bank[str(nfe)],
-                           arm_record["nfe"][str(nfe)]["student"]["average"][
+                           block.get("weighted_average", block["average"])[
                                "sliced_wasserstein_1"]))
         sample_grid_figure(root / f"pdd_samples_w{scale:g}.png", panels, controls,
                            f"PDD · w={scale:g} · teacher and NFE sweep",
@@ -819,12 +875,16 @@ def evaluate(args, root: Path, teacher: nn.Module, device: torch.device,
         nfe_rows = [{"nfe": int(key), "student": value["student"],
                      "teacher_nfe": value["teacher_nfe"],
                      "teacher_euler": value["teacher_euler"],
-                     "rmse_teacher_grid": value["to_teacher_grid"]["rmse"]}
+                     "rmse_teacher_grid": value["to_teacher_grid"].get(
+                         "rmse_weighted", value["to_teacher_grid"]["rmse"])}
                     for key, value in sorted(arm_record["nfe"].items(),
                                              key=lambda item: int(item[0]))]
         nfe_figure(root / f"pdd_nfe_sweep_w{scale:g}.png", nfe_rows,
-                   arm_record["teacher_256"]["average"],
-                   arm_record["grid_rmse"]["rmse"], scale)
+                   arm_record["teacher_256"].get(
+                       "weighted_average", arm_record["teacher_256"]["average"]),
+                   arm_record["grid_rmse"].get("rmse_weighted",
+                                               arm_record["grid_rmse"]["rmse"]),
+                   scale)
 
     # DMD comparison for w=2 if the recorded archive exists.
     dmd_path = (dmd_root / "dmd2_bsim_w2" / "samples.npz"
@@ -839,24 +899,29 @@ def evaluate(args, root: Path, teacher: nn.Module, device: torch.device,
         bank = sample_banks[pdd_arm["arm"]]
         pdd_nfe = next((nfe for nfe in (4, 2, 8, 1) if str(nfe) in bank), None)
         if pdd_nfe is not None:
-            dmd_metrics = measure_grid(dmd_final, refs, geometry, directions)
+            dmd_metrics = measure_grid(dmd_final, refs, geometry, directions, probs)
+            dmd_average = dmd_metrics.get("weighted_average", dmd_metrics["average"])
             cache = next(value for key, value in teacher_cache.items()
                          if key[0] == pdd_arm["scale"] and key[1] == "midpoint")
             records["dmd2_bsim_w2"] = {
-                "student_sw1": dmd_metrics["average"]["sliced_wasserstein_1"],
-                "diversity": diversity_metrics(dmd_final),
+                "student_sw1": dmd_average["sliced_wasserstein_1"],
+                "diversity": diversity_metrics(dmd_final, class_weights=probs),
                 "to_teacher_256": distance_metrics(dmd_final,
-                                                   cache["teacher_256"])}
+                                                   cache["teacher_256"], probs)}
             comparison_figure(
                 root / "pdd_vs_dmd_w2.png",
                 [("Target", refs, None),
                  ("Teacher Heun-256", dmd_teacher,
-                  arm_record["teacher_256"]["average"]["sliced_wasserstein_1"]),
+                  arm_record["teacher_256"].get(
+                      "weighted_average", arm_record["teacher_256"]["average"])[
+                          "sliced_wasserstein_1"]),
                  ("DMD2 bsim w=2", dmd_final,
-                  dmd_metrics["average"]["sliced_wasserstein_1"]),
+                  dmd_average["sliced_wasserstein_1"]),
                  (f"PDD NFE={pdd_nfe}", bank[str(pdd_nfe)],
-                  arm_record["nfe"][str(pdd_nfe)]["student"]["average"][
-                      "sliced_wasserstein_1"])],
+                  arm_record["nfe"][str(pdd_nfe)]["student"].get(
+                      "weighted_average",
+                      arm_record["nfe"][str(pdd_nfe)]["student"]["average"])[
+                          "sliced_wasserstein_1"])],
                 controls, "Spiral 4-NFE comparison · DMD2 vs PDD (matched noise)")
     save_json(evaluation / "metrics.json", records)
     return {"evaluation": str(evaluation), "summary": rows_for_summary}
@@ -916,6 +981,8 @@ def main(argv=None):
     parser.add_argument("--overlay-seed", type=int, default=20260926)
     parser.add_argument("--controls-from",
                         default="dmd/evaluation_s40_n4096_seed1234")
+    parser.add_argument("--dmd-run-name", default="dmd",
+                        help="DMD run whose evaluation supplies the comparison baselines")
     args = parser.parse_args(argv)
     if args.heads < 1 or args.heads > args.block_min:
         raise SystemExit("--heads must lie in 1..block-min")
@@ -928,6 +995,7 @@ def main(argv=None):
     teacher_folder = ROOT / "runs" / args.teacher_run
     teacher, teacher_checkpoint = load_teacher(teacher_folder, device, args.width,
                                                args.levels)
+    probs = class_probs_from_config(teacher_checkpoint["config"])
     from core import fingerprint
     teacher_checkpoint["sha256"] = fingerprint(teacher_folder / "checkpoint.pt")["sha256"]
 
@@ -940,7 +1008,7 @@ def main(argv=None):
             train_arm(local, root / name, teacher, teacher_checkpoint, teacher_folder,
                       device, geometry, scale)
     if args.stage in ("evaluate", "all"):
-        result = evaluate(args, root, teacher, device, geometry)
+        result = evaluate(args, root, teacher, device, geometry, probs)
         print(f"Evaluation: {result['evaluation']}", flush=True)
 
 

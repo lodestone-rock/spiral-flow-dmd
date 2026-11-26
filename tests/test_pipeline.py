@@ -20,8 +20,10 @@ from torch import nn
 HERE = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(HERE))
 
-from core import (FullCFGMLP, Geometry, encode_groups, log_density, rotate,
-                  sample_data, state_digest, standardized_coordinates)
+from core import (FullCFGMLP, Geometry, average_classes, class_probs_from_config,
+                  draw_class_probs, encode_groups, log_density, rotate,
+                  sample_data, sample_groups, state_digest,
+                  standardized_coordinates)
 from dmd import (DMD2_SCHEDULE, WEIGHT_MODES, denoise, dm_per_sample,
                  heun_snapshots, initialize_copy, renoise, rollout,
                  score_from_velocity, uniform_times, validate_schedule,
@@ -78,6 +80,52 @@ class DataTests(unittest.TestCase):
             2 * np.pi * geometry.radial_std * geometry.tangential_std)
         torch.testing.assert_close(logp, torch.as_tensor(expected), rtol=1e-6, atol=1e-7)
         self.assertGreater(float(logp.mean()), -2.0)
+
+
+class ClassPriorTests(unittest.TestCase):
+    def test_balanced_control(self):
+        self.assertEqual(draw_class_probs(0.0, 4), [1 / 8] * 8)
+
+    def test_dirichlet_prior_is_deterministic_and_floored(self):
+        first = draw_class_probs(0.5, 4)
+        second = draw_class_probs(0.5, 4)
+        self.assertEqual(first, second)
+        self.assertAlmostEqual(sum(first), 1.0, places=12)
+        self.assertEqual(len(first), 8)
+        self.assertGreater(min(first), 0.0)
+        self.assertGreater(max(first) / min(first), 2.0)
+        self.assertNotEqual(first, draw_class_probs(0.5, 5))
+
+    def test_sample_groups_follows_prior(self):
+        probs = [0.40, 0.20, 0.12, 0.08, 0.07, 0.06, 0.04, 0.03]
+        gen = torch.Generator().manual_seed(0)
+        ids = sample_groups(200000, gen, "cpu", probs)
+        frequencies = np.bincount(ids.numpy(), minlength=8) / len(ids)
+        np.testing.assert_allclose(frequencies, probs, atol=0.006)
+
+    def test_weighted_average(self):
+        rows = [{"sliced_wasserstein_1": float(g), "hdr_50_mass": float(g),
+                 **{key: 0.0 for key in ("hdr_90_mass", "mean_displacement",
+                                         "median_displacement", "covariance_trace_ratio",
+                                         "inverse_mean_error", "inverse_mean_norm",
+                                         "inverse_variance_ratio",
+                                         "requested_class_assignment_fraction")}}
+                for g in range(8)]
+        weights = [0.4, 0.2, 0.12, 0.08, 0.07, 0.06, 0.04, 0.03]
+        weighted = average_classes(rows, weights)
+        self.assertAlmostEqual(weighted["sliced_wasserstein_1"],
+                               float(np.dot(weights, np.arange(8))))
+        self.assertAlmostEqual(average_classes(rows)["sliced_wasserstein_1"], 3.5)
+
+    def test_class_probs_from_config(self):
+        self.assertIsNone(class_probs_from_config({"arguments": {}}))
+        probs = draw_class_probs(0.5, 4)
+        for config in ({"class_probs": probs},
+                       {"arguments": {"class_probs": probs}}):
+            np.testing.assert_allclose(class_probs_from_config(config), probs,
+                                       rtol=0, atol=1e-12)
+        with self.assertRaises(ValueError):
+            class_probs_from_config({"class_probs": [0.5] * 7})
 
 
 class DMDPrimitiveTests(unittest.TestCase):

@@ -24,7 +24,7 @@ this file), not from the parent research repository.
 python -m unittest discover -s tests -v
 ```
 
-Expected: **36 tests pass** (fast, CPU-only: 19 pipeline + 17 PDD).
+Expected: **41 tests pass** (fast, CPU-only: 19 pipeline + 17 PDD + 5 class-prior).
 
 ## Fast smoke run (about 1–2 minutes)
 
@@ -54,12 +54,38 @@ Smoke outputs are intentionally low quality; use them only to check plumbing.
 
 This runs, in order:
 
-1. `tests/` (36 unit tests)
+1. `tests/` (41 unit tests)
 2. `train_flow.py all --run-name teacher` (~1 minute)
 3. `dmd.py all --run-name dmd --teacher-run teacher` (~25–30 minutes)
 4. `pdd.py all --run-name pdd --teacher-run teacher --scales 2 --updates 50000`
    (~2–5 minutes for the toy 50k-update recipe)
 5. `interpolate.py --teacher-run teacher --scales 1 2` (~1 minute, **no retraining**)
+
+For a random class-imbalanced dataset, set the prior on the teacher and give the
+students fresh run names:
+
+```bash
+CLASS_ALPHA=0.5 CLASS_SEED=4 ./run_all.sh cuda teacher_imb dmd_imb pdd_imb
+```
+
+or stage by stage:
+
+```bash
+python train_flow.py all --device cuda --run-name teacher_imb \
+    --class-alpha 0.5 --class-seed 4
+python dmd.py all --device cuda --run-name dmd_imb --teacher-run teacher_imb
+python pdd.py all --device cuda --run-name pdd_imb --teacher-run teacher_imb \
+    --scales 2 --updates 200000 --dmd-run-name dmd_imb \
+    --controls-from dmd_imb/evaluation_s40_n4096_seed1234
+python interpolate.py --device cuda --teacher-run teacher_imb --scales 1 2
+```
+
+`--class-alpha 0` (default) is the balanced control. With `alpha > 0`, the
+teacher draws one prior from `Dirichlet(alpha)` using `--class-seed`, stores it
+as `class_probs` in `config.json`, and every student inherits it. `--class-floor`
+clamps rare classes before renormalization. Evaluation always writes both
+`average` (uniform over classes) and `weighted_average` (under the run's class
+prior); summaries and figures use the weighted value when present.
 
 To run stages individually:
 
@@ -72,9 +98,12 @@ python interpolate.py --device cuda --teacher-run teacher --scales 1 2
 
 ## What each file does
 
-- `core.py` — spiral geometry/data, conditional CFG U-MLP, linear flow path,
-  Heun sampler, metrics, plotting helpers.
-- `train_flow.py` — teacher flow matching (10% class dropout) and its sample grid.
+- `core.py` — spiral geometry/data, random class priors, conditional CFG U-MLP,
+  linear flow path, Heun sampler, metrics (uniform and class-weighted), plotting
+  helpers.
+- `train_flow.py` — teacher flow matching (10% class dropout) and its sample
+  grid. `--class-alpha/--class-seed/--class-floor` draw the dataset's class
+  prior.
 - `dmd.py` — DMD1/DMD2 distillation. Arms are
   `{dmd1,dmd2} × {bsim,bptt} × w{2,4}`.
   - `bptt` = backprop through **all four** rollout steps.
@@ -128,6 +157,33 @@ PDD: `runs/<pdd-run>/`
 - `pdd_samples_w2.png`, `pdd_nfe_sweep_w2.png`, `pdd_vs_dmd_w2.png`
 - curated numbers: `results/pdd_summary.json`
 
+For a class-imbalanced run, the same artifacts are produced, but every metric
+block also carries `weighted_average` and the summaries use it. Curated
+balanced-vs-imbalanced numbers live in `results/imbalanced_summary.json`.
+
+### Recorded imbalanced rerun (class seed 4)
+
+Prior: `Dirichlet(0.5)`, floor 0.02, values
+`[0.2298, 0.0352, 0.0847, 0.1271, 0.1581, 0.0196, 0.3259, 0.0196]`.
+Runs: `teacher_imb`, `dmd_imb`, `pdd_imb`, plus `pdd_imb_{w1,shift2,euler128,datafree}`.
+
+- Teacher `w=2`: weighted SW1 0.08994 (uniform 0.09342), weighted HDR50 34.6%
+  (uniform 40.6%), assignment 99.85%. The balanced teacher was 0.08147 / 74.7%.
+- Teacher per-class HDR50 is uneven: `g6` 6.1% and `g3` 7.2% versus `g0/g1/g2`
+  at 78/77/64%. This is a class-specific `w=2` CFG effect, not a pipeline bug.
+- PDD 4-NFE: SW1 0.09200 (uniform 0.09449), teacher-256 SW1 0.08982,
+  RMSE→teacher 0.02468, diversity 0.2407 (teacher 0.2435).
+- DMD ranking flips: balanced best is `dmd2_bsim_w2` (0.06976), imbalanced
+  weighted best is `dmd1_bptt_w2` (0.07902); `dmd2_bsim_w2` degrades to 0.10391
+  weighted / 0.11867 uniform.
+- Interpolation stays smooth: `w=2` −313.2°, 28/28 clockwise; unseen SW1
+  0.08468, uniform HDR50 38.7%.
+
+Use `--dmd-run-name dmd_imb --controls-from dmd_imb/evaluation_s40_n4096_seed1234`
+for PDD so noise and prior match the DMD baseline. The re-evaluation commands for
+the imbalanced teacher/DMD are `train_flow.py evaluate --run-name teacher_imb`
+and `dmd.py evaluate --run-name dmd_imb --teacher-run teacher_imb`.
+
 ## Repo invariants
 
 - Do not overwrite recorded outputs. Pass a fresh `--run-name`,
@@ -146,5 +202,10 @@ PDD: `runs/<pdd-run>/`
   DMD can beat the guided teacher on SW1 by partially undoing CFG; PDD instead
   matches the guided field, so a higher SW1 with much lower teacher RMSE is the
   expected result, not a failure.
+- The class prior is dataset-level: draw it once in `train_flow.py`, store it in
+  `config.json`, and let DMD/PDD inherit it. Do not resample a different prior
+  per stage. For imbalanced runs, report the class-weighted average as the
+  primary number and keep the uniform average alongside it; SW1 can look fine
+  while HDR50 collapses under a skewed CFG marginal.
 - Update `README.md` and `figures/` when adding user-facing results, and rebuild
   `experiments/spiral_flow_dmd.zip` if a shareable archive is requested.
